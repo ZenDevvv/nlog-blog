@@ -45,9 +45,35 @@ export const addPost = (req, res) => {
   const q =
     "INSERT INTO posts (`user_id`, `title`, `content`, `created_at`, `updated_at`) VALUES(?,?,?,NOW(), NOW())";
   const values = [req.params.id, req.body.title, req.body.content];
+
   db.query(q, values, (err, data) => {
     if (err) return res.json(err);
-    return res.json("Added successfully");
+    
+    const postId = data.insertId;
+    const tags = req.body.tags;
+
+    if(tags && tags.length > 0){
+      let insertCount = 0;
+
+      tags.forEach(tag => {
+        const q = "INSERT INTO tags (tag_name) VALUES (?) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)";
+        db.query(q, [tag], (err, data) => {
+          if (err) return res.json(err);
+          const tagId = data.insertId;
+          const insertToPostTagsQ = "INSERT INTO post_tags (post_id, tag_id) VALUES (?, ?)";
+          db.query(insertToPostTagsQ, [postId, tagId], (err, data) => {
+            if(err) return res.json(err);
+
+            insertCount++;
+            if (insertCount === tags.length) {
+              return res.json("Added successfully");
+            }
+          });
+        });
+      });
+    } else {
+      return res.json("Added successfully");
+    }
   });
 };
 

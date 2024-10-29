@@ -3,6 +3,7 @@ import {
   IoIosSearch,
   IoIosAddCircleOutline,
   IoIosTrendingUp,
+  IoIosHome,
 } from "react-icons/io";
 import { AuthContext } from "../context/AuthContext";
 import Write from "./Write";
@@ -16,25 +17,20 @@ export default function Navbar() {
       <div className="text-white w-full flex lg:flex-col justify-evenly items-center px-2 py-3 md:py-5 border-2 border-primary lg:h-screen lg:w-fit lg:border-0 lg:border-r-2 lg:justify-between lg:py-12">
         <Link to={`/profile/${currentUser.id}`}>
           <div className="flex items-center gap-2 lg:w-full cursor-pointer">
-            <a className="bg-primary text-darkBg h-full aspect-square grid place-content-center rounded-full p-3 lg:p-6 text-xl lg:text-3xl font-semibold">
+            <p className="bg-primary text-darkBg h-full aspect-square grid place-content-center rounded-full p-3 lg:p-6 text-xl lg:text-3xl font-semibold">
               {currentUser?.username[0].toUpperCase()}
-            </a>
-            <a className="hidden md:inline-block lg:hidden">
+            </p>
+            <p className="hidden md:inline-block lg:hidden">
               {currentUser?.username}
-            </a>
+            </p>
           </div>
         </Link>
 
-        <ul className="flex items-center space-x-6 sm:space-x-14 lg:flex-col lg:space-x-0 lg:flex-1 lg:space-y-10 lg:mt-10">
-          <li className="flex items-center gap-2 lg:flex-col lg:gap-1 lg:w-full cursor-pointer">
-            <IoIosSearch className="text-primary text-4xl" />
-            <a className="hidden md:inline-block">Search</a>
-          </li>
-          <li className="flex items-center gap-2 lg:gap-1 lg:flex-col lg:w-full cursor-pointer">
-            <IoIosTrendingUp className="text-primary text-4xl" />
-            <a className="hidden md:inline-block">Trending</a>
-          </li>
-        </ul>
+        <div className="flex items-center gap-2 lg:flex-col lg:gap-1 lg:w-full cursor-pointer">
+          <IoIosSearch className="text-primary text-4xl" />
+          <a className="hidden md:inline-block">Search</a>
+        </div>
+
         <div
           onClick={() => setCreatePost(!createPost)}
           className="flex items-center gap-2 lg:gap-1 lg:flex-col lg:w-full cursor-pointer"
@@ -42,6 +38,17 @@ export default function Navbar() {
           <IoIosAddCircleOutline className="text-primary text-4xl" />
           <a className="hidden md:inline-block">Create</a>
         </div>
+
+        <div className="flex items-center gap-2 lg:gap-1 lg:flex-col lg:w-full cursor-pointer">
+          <IoIosTrendingUp className="text-primary text-4xl" />
+          <a className="hidden md:inline-block">Trending</a>
+        </div>
+
+        <Link to={'/'}>
+          <div>
+            <IoIosHome className="text-primary text-2xl" />
+          </div>
+        </Link>
 
         {createPost && <Write setCreatePost={setCreatePost} />}
       </div>

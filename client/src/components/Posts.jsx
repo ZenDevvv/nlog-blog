@@ -38,7 +38,7 @@ export default function Posts({posts}) {
 
               <div className="w-full">
                 <h1 className="w-fit pb-1 text-primary font-serif text-xl md:text-3xl lg:text-4xl md:pb-4  hover:pl-2 transition-padding duration-200">
-                  <Link to={`/post/${post.id}`}>{post.title}</Link>
+                  <Link to={`/post/${post.post_id}`}>{post.title}</Link>
                 </h1>
 
                 <p className="text-xs font-light md:text-lg lg:text-xl line-clamp-4">
@@ -64,9 +64,9 @@ export default function Posts({posts}) {
                   <p>{formattedDate}</p>
 
                   <Link to={`/profile/${post.user_id}`}>
-                    <a href="" className="font-extralight hover:underline">
+                    <p href="" className="font-extralight hover:underline">
                       @{post.username}
-                    </a>
+                    </p>
                   </Link>
                 </div>
 

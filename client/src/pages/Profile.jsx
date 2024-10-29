@@ -19,9 +19,11 @@ export default function Profile() {
   useEffect(() => {
     const getUser = async () => {
       try {
-        const res = await axios.get(`${SERVER}/profile/${userID}`);
-        setPosts(res.data);
-        console.log(res.data);
+        const res = await axios.get(`${SERVER}/profile/${userID}`);        
+        const sortedPosts = res.data.sort(
+          (a, b) => new Date(b.updated_at) - new Date(a.updated_at)
+        );
+        setPosts(sortedPosts);
       } catch (err) {
         console.log(err);
       }

@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useContext, useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 const SERVER = import.meta.env.VITE_DEV_SERVER;
 import { AuthContext } from "../context/AuthContext";
 import dayjs from "dayjs";
@@ -66,7 +66,10 @@ export default function Single() {
             {post.title}
           </h1>
           <div className="text-[#A5A5A5] pt-4 font-extralight">
-            <p>written by @{post.username}</p>
+            <p>
+              written by {" "} 
+              <Link className="cursor-pointer hover:underline" to={`/profile/${post.user_id}`}>@{post.username}</Link>
+            </p>
             <p>on {formatDate(post.updated_at)}</p>
           </div>
           {currentUser.username === post.username && (

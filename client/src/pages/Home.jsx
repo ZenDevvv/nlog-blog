@@ -79,7 +79,6 @@ export default function Home() {
           (a, b) => new Date(b.updated_at) - new Date(a.updated_at)
         );
         setPosts(sortedPosts);
-        console.log(sortedPosts)
       } catch (err) {
         console.log(err);
       }
