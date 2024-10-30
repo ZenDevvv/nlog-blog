@@ -14,7 +14,7 @@ export default function Navbar() {
   const [createPost, setCreatePost] = useState(false);
   return (
     <nav className="fixed w-screen lg:w-fit bottom-0 left-0 p-4 lg:p-0 bg-darkBg z-10 min-w-[350px] lg:min-w-0">
-      <div className="text-white w-full flex lg:flex-col justify-evenly items-center px-2 py-3 md:py-5 border-2 border-primary lg:h-screen lg:w-fit lg:border-0 lg:border-r-2 lg:justify-between lg:py-12">
+      <div className="text-white w-full flex lg:flex-col justify-evenly  items-center px-2 py-3 md:py-5 border-2 border-primary lg:h-screen lg:w-fit lg:border-0 lg:border-r-2 lg:justify-normal lg:py-12 lg:gap-8">
         <Link to={`/profile/${currentUser.id}`}>
           <div className="flex items-center gap-2 lg:w-full cursor-pointer">
             <p className="bg-primary text-darkBg h-full aspect-square grid place-content-center rounded-full p-3 lg:p-6 text-xl lg:text-3xl font-semibold">
@@ -44,9 +44,9 @@ export default function Navbar() {
           <a className="hidden md:inline-block">Trending</a>
         </div>
 
-        <Link to={'/'}>
+        <Link className="h-full flex flex-col items-end justify-end" to={'/'}>
           <div>
-            <IoIosHome className="text-primary text-2xl" />
+            <IoIosHome className="text-primary text-2xl lg:text-3xl" />
           </div>
         </Link>
 

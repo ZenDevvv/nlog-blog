@@ -40,7 +40,7 @@ export const getPost = (req, res) => {
     return res.json(data);
   });
 };
-
+ 
 export const addPost = (req, res) => {
   const q =
     "INSERT INTO posts (`user_id`, `title`, `content`, `created_at`, `updated_at`) VALUES(?,?,?,NOW(), NOW())";

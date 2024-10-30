@@ -56,4 +56,9 @@ export const login = (req, res) => {
   }); 
 };
 
-export const logout = (req, res) => {};
+export const logout = (req, res) => {
+  console.log(res.cookies)
+  res.clearCookie("access_token", {
+    sameSite: "lax",
+  }).status(200).json("User has been logged out");
+};
