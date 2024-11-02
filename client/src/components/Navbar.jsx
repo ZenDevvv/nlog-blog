@@ -52,7 +52,7 @@ export default function Navbar() {
           </div>
         </Link>
 
-        {createPost && <Write setCreatePost={setCreatePost} />}
+        {createPost && <Write setCreatePost={setCreatePost}  />}
       </div>}
     </nav>
   );

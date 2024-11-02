@@ -49,14 +49,13 @@ JOIN
 JOIN 
     tags ON post_tags.tag_id = tags.id
 WHERE 
-    posts.id = ${req.params.id};
-            `;
+    posts.id = ${req.params.id}`;
   db.query(q, [req.params.id], (err, data) => {
     if (err) return res.json(err);
     return res.json(data);
   });
 };
- 
+
 export const addPost = (req, res) => {
   const q =
     "INSERT INTO posts (`user_id`, `title`, `content`, `created_at`, `updated_at`) VALUES(?,?,?,NOW(), NOW())";
@@ -64,21 +63,23 @@ export const addPost = (req, res) => {
 
   db.query(q, values, (err, data) => {
     if (err) return res.json(err);
-    
+
     const postId = data.insertId;
     const tags = req.body.tags;
 
-    if(tags && tags.length > 0){
+    if (tags && tags.length > 0) {
       let insertCount = 0;
 
-      tags.forEach(tag => {
-        const q = "INSERT INTO tags (tag_name) VALUES (?) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)";
+      tags.forEach((tag) => {
+        const q =
+          "INSERT INTO tags (tag_name) VALUES (?) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)";
         db.query(q, [tag], (err, data) => {
           if (err) return res.json(err);
           const tagId = data.insertId;
-          const insertToPostTagsQ = "INSERT INTO post_tags (post_id, tag_id) VALUES (?, ?)";
+          const insertToPostTagsQ =
+            "INSERT INTO post_tags (post_id, tag_id) VALUES (?, ?)";
           db.query(insertToPostTagsQ, [postId, tagId], (err, data) => {
-            if(err) return res.json(err);
+            if (err) return res.json(err);
 
             insertCount++;
             if (insertCount === tags.length) {
@@ -94,14 +95,47 @@ export const addPost = (req, res) => {
 };
 
 export const editPost = (req, res) => {
-  return res.json("okay!")
-  // const q =
-  //   "UPDATE posts SET `title`=?, `content`=?, `updated_at`=NOW() WHERE id=?";
-  // const values = [req.body.title, req.body.content, req.params.id];
-  // db.query(q, values, (err, data) => {
-  //   if (err) return res.json(err);
-  //   return res.json("updated successfully");
-  // });
+  const q =
+    "UPDATE posts SET `title`=?, `content`=?, `updated_at`=NOW() WHERE id=?";
+  const values = [req.body.title, req.body.content, req.params.id];
+
+  db.query(q, values, (err, data) => {
+    if (err) return res.json(err);
+
+    const postId = req.params.id;
+    const tags = req.body.tags;
+
+    // Handle tags if provided
+    if (tags && tags.length > 0) {
+      // First, delete existing tags for the post
+      const deleteTagsQ = "DELETE FROM post_tags WHERE post_id=?";
+      db.query(deleteTagsQ, [postId], (err) => {
+        if (err) return res.json(err);
+
+        let insertCount = 0;
+        tags.forEach((tag) => {
+          const q =
+            "INSERT INTO tags (tag_name) VALUES (?) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)";
+          db.query(q, [tag], (err, data) => {
+            if (err) return res.json(err);
+            const tagId = data.insertId;
+            const insertToPostTagsQ =
+              "INSERT INTO post_tags (post_id, tag_id) VALUES (?, ?)";
+            db.query(insertToPostTagsQ, [postId, tagId], (err) => {
+              if (err) return res.json(err);
+
+              insertCount++;
+              if (insertCount === tags.length) {
+                return res.json("Post updated successfully");
+              }
+            });
+          });
+        });
+      });
+    } else {
+      return res.json("Post updated successfully");
+    }
+  });
 };
 
 export const deletePost = (req, res) => {
@@ -111,13 +145,12 @@ export const deletePost = (req, res) => {
   jwt.verify(token, process.env.JWT_KEY, (err, userInfo) => {
     if (err) return res.status(403).json("Token is not valid!");
 
-    console.log([userInfo.id, req.params.id])
+    console.log([userInfo.id, req.params.id]);
     const q = "DELETE FROM posts where id=? AND user_id=?";
     db.query(q, [Number(req.params.id), userInfo.id], (err, data) => {
       if (err) res.json(err);
-      console.log(data)
+      console.log(data);
       return res.json("deleted successfully");
     });
   });
 };
- 

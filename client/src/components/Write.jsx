@@ -25,7 +25,6 @@ export default function Write({ setCreatePost, post }) {
         content,
         tags,
       });
-      console.log(res.data);
       window.location.reload();
     } catch (err) {
       console.log(err);
@@ -35,19 +34,23 @@ export default function Write({ setCreatePost, post }) {
   const editPost = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.put(`${SERVER}/posts/${post.id}`)
-      console.log(res.data)
-    }catch (err){
-      console.log(err)
+      const res = await axios.put(`${SERVER}/posts/${post.id}`, {
+        title,
+        content,
+        tags,
+      });
+      window.location.reload();
+    } catch (err) {
+      console.log(err);
     }
-  }
+  };
 
   return (
     <div
       onClick={(e) =>
         e.target === e.currentTarget ? setCreatePost(false) : null
       }
-      className="fixed inset-0 flex justify-center items-center bg-darkBg bg-opacity-80"
+      className="fixed inset-0 flex justify-center items-center bg-darkBg bg-opacity-80 z-10"
     >
       <div className="bg-darkBg w-full m-6 p-6 border-2 border-primary rounded-md">
         <div className="space-y-6">
