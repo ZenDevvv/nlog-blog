@@ -30,10 +30,26 @@ export const getAllPost = (req, res) => {
 };
 
 export const getPost = (req, res) => {
-  const q = `SELECT posts.id, title, content, views, posts.created_at, updated_at, privacy, username 
-            FROM posts
-            JOIN users ON posts.user_id = users.id
-            WHERE posts.id = ${req.params.id}
+  const q = `SELECT 
+    posts.id, 
+    posts.title, 
+    posts.content, 
+    posts.views, 
+    posts.created_at, 
+    posts.updated_at, 
+    posts.privacy, 
+    users.username, 
+    GROUP_CONCAT(tags.tag_name) AS tags
+FROM 
+    posts
+JOIN 
+    users ON posts.user_id = users.id
+JOIN 
+    post_tags ON posts.id = post_tags.post_id
+JOIN 
+    tags ON post_tags.tag_id = tags.id
+WHERE 
+    posts.id = ${req.params.id};
             `;
   db.query(q, [req.params.id], (err, data) => {
     if (err) return res.json(err);
@@ -78,13 +94,14 @@ export const addPost = (req, res) => {
 };
 
 export const editPost = (req, res) => {
-  const q =
-    "UPDATE posts SET `title`=?, `content`=?, `updated_at`=NOW() WHERE id=?";
-  const values = [req.body.title, req.body.content, req.params.id];
-  db.query(q, values, (err, data) => {
-    if (err) return res.json(err);
-    return res.json("updated successfully");
-  });
+  return res.json("okay!")
+  // const q =
+  //   "UPDATE posts SET `title`=?, `content`=?, `updated_at`=NOW() WHERE id=?";
+  // const values = [req.body.title, req.body.content, req.params.id];
+  // db.query(q, values, (err, data) => {
+  //   if (err) return res.json(err);
+  //   return res.json("updated successfully");
+  // });
 };
 
 export const deletePost = (req, res) => {

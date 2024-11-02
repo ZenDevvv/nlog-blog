@@ -15,6 +15,7 @@ export default function AddTagBtn({tags, setTags}) {
     if(addTag && tagValue) {
         setTags([...tags, tagValue.replace(/\s+/g, '')]);
         setTagValue('');
+        console.log(tags)
     }
     setAddTag(!addTag);
   }

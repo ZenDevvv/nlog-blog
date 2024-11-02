@@ -12,8 +12,10 @@ import { Link } from "react-router-dom";
 export default function Navbar() {
   const { currentUser } = useContext(AuthContext);
   const [createPost, setCreatePost] = useState(false);
+  
   return (
     <nav className="fixed w-screen lg:w-fit bottom-0 left-0 p-4 lg:p-0 bg-darkBg z-10 min-w-[350px] lg:min-w-0">
+      {currentUser && 
       <div className="text-white w-full flex lg:flex-col justify-evenly  items-center px-2 py-3 md:py-5 border-2 border-primary lg:h-screen lg:w-fit lg:border-0 lg:border-r-2 lg:justify-normal lg:py-12 lg:gap-8">
         <Link to={`/profile/${currentUser.id}`}>
           <div className="flex items-center gap-2 lg:w-full cursor-pointer">
@@ -51,7 +53,7 @@ export default function Navbar() {
         </Link>
 
         {createPost && <Write setCreatePost={setCreatePost} />}
-      </div>
+      </div>}
     </nav>
   );
 }
