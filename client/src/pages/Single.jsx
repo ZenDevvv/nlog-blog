@@ -23,8 +23,7 @@ export default function Single() {
   // };
   const [post, setPost] = useState({});
   const { currentUser } = useContext(AuthContext);
-  const location = useLocation();
-  const postsID = location.pathname.split("/").pop();
+  const postsID = useLocation().pathname.split("/").pop();
   const navigate = useNavigate();
   const [createPost, setCreatePost] = useState(false);
 
@@ -33,6 +32,7 @@ export default function Single() {
       try {
         const res = await axios.get(`${SERVER}/posts/${postsID}`);
         setPost(res.data[0]);
+        console.log(res.data[0])
       } catch (err) {
         console.log(err);
       }
@@ -98,7 +98,7 @@ export default function Single() {
       </div>
 
       <div className="pt-12">
-        <p className="first-letter:text-6xl md:text-base">
+        <p className="first-letter:text-6xl md:text-base leading-7">
           {getText(post.content)}
         </p>
       </div>
@@ -106,3 +106,4 @@ export default function Single() {
     </div>
   );
 }
+ 

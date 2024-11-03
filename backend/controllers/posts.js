@@ -30,6 +30,8 @@ export const getAllPost = (req, res) => {
 };
 
 export const getPost = (req, res) => {
+  console.log("Get Single!")
+
   const q = `SELECT 
     posts.id, 
     posts.title, 
@@ -42,16 +44,19 @@ export const getPost = (req, res) => {
     GROUP_CONCAT(tags.tag_name) AS tags
 FROM 
     posts
-JOIN 
+LEFT JOIN 
     users ON posts.user_id = users.id
-JOIN 
+LEFT JOIN 
     post_tags ON posts.id = post_tags.post_id
-JOIN 
+LEFT JOIN 
     tags ON post_tags.tag_id = tags.id
 WHERE 
-    posts.id = ${req.params.id}`;
+    posts.id = ${req.params.id}
+GROUP BY 
+    posts.id;`;
   db.query(q, [req.params.id], (err, data) => {
     if (err) return res.json(err);
+    console.log(data)
     return res.json(data);
   });
 };
@@ -152,5 +157,26 @@ export const deletePost = (req, res) => {
       console.log(data);
       return res.json("deleted successfully");
     });
+  });
+};
+
+
+export const searchPosts = (req, res) => {
+  console.log("search post!")
+  const searchTerm = req.query.q; // Get the search term from query parameters
+  if (!searchTerm) return res.status(400).json("Search term is required!");
+
+  const q = `SELECT posts.id AS post_id, user_id, title, content, views, posts.created_at, posts.updated_at, privacy, users.username, 
+              GROUP_CONCAT(DISTINCT tags.tag_name) AS tags
+              FROM posts
+              JOIN users ON posts.user_id = users.id
+              LEFT JOIN post_tags ON post_tags.post_id = posts.id
+              LEFT JOIN tags ON post_tags.tag_id = tags.id
+              WHERE users.username LIKE ? OR posts.title LIKE ? OR posts.content LIKE ? OR tags.tag_name LIKE ?
+              GROUP BY posts.id;`;
+  
+  db.query(q, [`%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`], (err, data) => {
+    if (err) return res.json(err);
+    return res.json(data);
   });
 };

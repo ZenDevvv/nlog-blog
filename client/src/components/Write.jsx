@@ -50,7 +50,7 @@ export default function Write({ setCreatePost, post }) {
       onClick={(e) =>
         e.target === e.currentTarget ? setCreatePost(false) : null
       }
-      className="fixed inset-0 flex justify-center items-center bg-darkBg bg-opacity-80 z-10"
+      className="fixed inset-0 flex justify-center items-center bg-darkBg bg-opacity-80 z-30"
     >
       <div className="bg-darkBg w-full m-6 p-6 border-2 border-primary rounded-md">
         <div className="space-y-6">
