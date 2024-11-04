@@ -52,7 +52,7 @@ export default function Write({ setCreatePost, post }) {
       }
       className="fixed inset-0 flex justify-center items-center bg-darkBg bg-opacity-80 z-30"
     >
-      <div className="bg-darkBg w-full m-6 p-6 border-2 border-primary rounded-md">
+      <div className="bg-darkBg w-full m-6 p-6 border-2 border-primary rounded-md lg:max-w-[600px]">
         <div className="space-y-6">
           <h1 className="text-center text-2xl font-bold">
             {post ? "Edit Post" : "Create Post"}

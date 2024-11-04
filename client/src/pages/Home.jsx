@@ -15,42 +15,58 @@ export default function Home() {
   const tag = location.search;
   const { currentUser } = useContext(AuthContext);
 
-  const query = new URLSearchParams(location.search).get('q');
+  const query = new URLSearchParams(location.search).get("q");
   const searchResult = location.state?.searchResults;
+  const trending = location.pathname.split('/').pop()
 
+  const sortPostsByDate = (posts) => {
+    return posts.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+  };
 
   useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const res = await axios.get(`${SERVER}/posts/${tag}`);
-        const sortedPosts = res.data.sort(
-          (a, b) => new Date(b.updated_at) - new Date(a.updated_at)
-        );
-        setPosts([])
-        setPosts(sortedPosts);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-
     if (!currentUser) {
       navigate("/login");
       return;
     }
 
+    const fetchPosts = async () => {
+      try {
+        const res = await axios.get(`${SERVER}/posts/${tag}`);
+        const sortedPosts = sortPostsByDate(res.data);
+        setPosts(sortedPosts);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    
+    const fetchTrending = async () => {
+      try {
+        const res = await axios.get(`${SERVER}/posts/trending`);
+        setPosts(res.data);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+
+
+
     if (searchResult) {
       setPosts(searchResult);
+    } else if(trending){
+      fetchTrending();
     } else {
       fetchPosts();
     }
-  }, [tag, searchResult]);
+  }, [tag, searchResult, trending]);
 
   return (
     <section className="flex flex-col text-white pb-[100px] md:pb-[110px] lg:pl-32 lg:pr-16 xl:pl-[200px] xl:pr-28  max-w-[1600px] mx-auto">
       <div className="flex flex-col py-14 items-center md:items-start md:px-24 overflow-x-hidden">
         <div className="flex flex-col items-center md:ml-9">
           <div className="bg-primary w-6 h-1 lg:w-10 lg:h-1.5"></div>
-          <h2 className="text-lg lg:text-2xl">{searchResult ? `Searched for: ${query}` : "latest"}</h2>
+          <h2 className="text-lg lg:text-2xl">
+            {searchResult ? `Searched for: ${query}` : trending ? `Trending` : "latest"}
+          </h2>
         </div>
       </div>
 

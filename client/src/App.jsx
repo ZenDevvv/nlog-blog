@@ -38,6 +38,10 @@ const router = createBrowserRouter([
       {
         path: "/posts/search",
         element: <Home />
+      },
+      {
+        path: "/trending",
+        element: <Home />
       }
     ]
   },

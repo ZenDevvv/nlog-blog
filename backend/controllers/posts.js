@@ -30,7 +30,8 @@ export const getAllPost = (req, res) => {
 };
 
 export const getPost = (req, res) => {
-  console.log("Get Single!")
+  // const q = `UPDATE posts SET views = views+1 WHERE id=?`;
+  const postID = req.params.id;
 
   const q = `SELECT 
     posts.id, 
@@ -51,12 +52,11 @@ LEFT JOIN
 LEFT JOIN 
     tags ON post_tags.tag_id = tags.id
 WHERE 
-    posts.id = ${req.params.id}
+    posts.id = ?
 GROUP BY 
     posts.id;`;
-  db.query(q, [req.params.id], (err, data) => {
+  db.query(q, [postID], (err, data) => {
     if (err) return res.json(err);
-    console.log(data)
     return res.json(data);
   });
 };
@@ -160,9 +160,8 @@ export const deletePost = (req, res) => {
   });
 };
 
-
 export const searchPosts = (req, res) => {
-  console.log("search post!")
+  console.log("search post!");
   const searchTerm = req.query.q; // Get the search term from query parameters
   if (!searchTerm) return res.status(400).json("Search term is required!");
 
@@ -174,8 +173,46 @@ export const searchPosts = (req, res) => {
               LEFT JOIN tags ON post_tags.tag_id = tags.id
               WHERE users.username LIKE ? OR posts.title LIKE ? OR posts.content LIKE ? OR tags.tag_name LIKE ?
               GROUP BY posts.id;`;
-  
-  db.query(q, [`%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`], (err, data) => {
+
+  db.query(
+    q,
+    [
+      `%${searchTerm}%`,
+      `%${searchTerm}%`,
+      `%${searchTerm}%`,
+      `%${searchTerm}%`,
+    ],
+    (err, data) => {
+      if (err) return res.json(err);
+      return res.json(data);
+    }
+  );
+};
+
+export const incrementViews = (req, res) => {
+  console.log("increment")
+  const postID = req.params.id; 
+  const q = `UPDATE posts SET views = views + 1, updated_at = updated_at WHERE id = ?;
+`; 
+
+  db.query(q, [postID], (err, data) => {
+    if (err) return res.json(err); 
+    return res.json("Views incremented successfully"); 
+  });
+};
+
+export const trendingPosts = (req, res) => {
+  console.log("reached trending!")
+  const q = `SELECT posts.id AS post_id, user_id, title, content, views, posts.created_at, updated_at, privacy, username, 
+              GROUP_CONCAT(tags.tag_name) AS tags
+              FROM posts 
+              JOIN users ON posts.user_id = users.id 
+              LEFT JOIN post_tags ON posts.id = post_tags.post_id 
+              LEFT JOIN tags ON post_tags.tag_id = tags.id 
+              GROUP BY posts.id 
+              ORDER BY views DESC;`
+
+  db.query(q, (err, data) => {
     if (err) return res.json(err);
     return res.json(data);
   });

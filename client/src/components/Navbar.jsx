@@ -30,7 +30,10 @@ export default function Navbar() {
             </div>
           </Link>
 
-          <div onClick={() => setOpenSearchBar(!openSearchBar)} className="flex items-center gap-2 lg:flex-col lg:gap-1 lg:w-full cursor-pointer">
+          <div
+            onClick={() => setOpenSearchBar(!openSearchBar)}
+            className="flex items-center gap-2 lg:flex-col lg:gap-1 lg:w-full cursor-pointer"
+          >
             <IoIosSearch className="text-primary text-4xl" />
             <a className="hidden md:inline-block">Search</a>
           </div>
@@ -43,10 +46,12 @@ export default function Navbar() {
             <a className="hidden md:inline-block">Create</a>
           </div>
 
-          <div className="flex items-center gap-2 lg:gap-1 lg:flex-col lg:w-full cursor-pointer">
-            <IoIosTrendingUp className="text-primary text-4xl" />
-            <a className="hidden md:inline-block">Trending</a>
-          </div>
+          <Link to={"/trending"} >
+            <div className="flex items-center gap-2 lg:gap-1 lg:flex-col lg:w-full cursor-pointer">
+              <IoIosTrendingUp className="text-primary text-4xl" />
+              <p className="hidden md:inline-block">Trending</p>
+            </div>
+          </Link>
 
           <Link className="h-full flex flex-col items-end justify-end" to={"/"}>
             <div>

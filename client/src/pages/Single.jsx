@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 const SERVER = import.meta.env.VITE_DEV_SERVER;
 import { AuthContext } from "../context/AuthContext";
@@ -26,20 +26,27 @@ export default function Single() {
   const postsID = useLocation().pathname.split("/").pop();
   const navigate = useNavigate();
   const [createPost, setCreatePost] = useState(false);
+  const hasIncrementedViews = useRef(false);
 
   useEffect(() => {
     const fetchPost = async () => {
+      console.log("single")
       try {
         const res = await axios.get(`${SERVER}/posts/${postsID}`);
         setPost(res.data[0]);
-        console.log(res.data[0])
+
+        // Increment views only once
+        if (!hasIncrementedViews.current) {
+          await axios.put(`${SERVER}/posts/${postsID}/increment-views`);
+          hasIncrementedViews.current = true; // Set to true after incrementing
+        }
       } catch (err) {
         console.log(err);
       }
     };
 
     fetchPost();
-  }, []);
+  }, [postsID]);
 
   const getText = (html) => {
     const doc = new DOMParser().parseFromString(html, "text/html");
