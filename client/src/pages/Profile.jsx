@@ -22,7 +22,6 @@ export default function Profile() {
   useEffect(() => {
     setLoading(true);
     const getUser = async () => {
-      console.log("profile")
       try {
         const res = await axios.get(`${SERVER}/profile/${userID}`);
         const sortedPosts = res.data.sort(

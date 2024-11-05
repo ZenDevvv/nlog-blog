@@ -1,18 +1,20 @@
-import React, {useState, createContext, useEffect} from 'react'
+import React, { useState, createContext, useEffect } from "react";
 
 export const AuthContext = createContext();
 
-export const AuthContextProvider = ({children}) => {
-    const [currentUser, setCurrentUser] = useState(JSON.parse(localStorage.getItem("user") || null));
+export const AuthContextProvider = ({ children }) => {
+  const [currentUser, setCurrentUser] = useState(
+    JSON.parse(localStorage.getItem("user") || null)
+  );
+  console.log(document.cookie);
 
+  useEffect(() => {
+    localStorage.setItem("user", JSON.stringify(currentUser));
+  }, [currentUser]);
 
-    useEffect(() => {
-        localStorage.setItem("user", JSON.stringify(currentUser))
-    },[currentUser])
-
-    return (
-        <AuthContext.Provider value={{currentUser, setCurrentUser}}>
-            {children}
-        </AuthContext.Provider>
-    )
-}
+  return (
+    <AuthContext.Provider value={{ currentUser, setCurrentUser }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};

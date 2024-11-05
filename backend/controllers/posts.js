@@ -2,31 +2,38 @@ import db from "../dbconfig.js";
 import jwt from "jsonwebtoken";
 
 export const getAllPost = (req, res) => {
-  const q = req.query.tag
-    ? `SELECT posts.id AS post_id, user_id, title, content, views, posts.created_at, posts.updated_at, privacy, username, 
-       GROUP_CONCAT(DISTINCT tag_name) AS tags
-        FROM posts
-        JOIN users ON posts.user_id = users.id
-        LEFT JOIN post_tags ON post_tags.post_id = posts.id
-        LEFT JOIN tags ON post_tags.tag_id = tags.id
-        WHERE posts.id IN (
-            SELECT post_tags.post_id
-            FROM post_tags
-            JOIN tags ON post_tags.tag_id = tags.id
-            WHERE tags.tag_name = '${req.query.tag}'
-        )
-        GROUP BY posts.id;`
-    : `SELECT posts.id AS post_id, user_id, title, content, views, posts.created_at, updated_at, privacy, username, 
-          GROUP_CONCAT(tag_name) AS tags 
-        FROM posts 
-        JOIN users ON posts.user_id = users.id 
-        LEFT JOIN post_tags ON post_tags.post_id = posts.id 
-        LEFT JOIN tags ON post_tags.tag_id = tags.id 
-        GROUP BY posts.id`;
-  db.query(q, (err, data) => {
-    if (err) return res.json(err);
-    return res.json(data);
-  });
+  const token = req.cookies.access_token;
+  if (!token) return res.status(401).json("Not Authenticated!");
+
+  jwt.verify(token, process.env.JWT_KEY, (err, userInfo) => {
+    if (err) return res.status(403).json("Token is not valid!");
+
+    const q = req.query.tag
+      ? `SELECT posts.id AS post_id, user_id, title, content, views, posts.created_at, posts.updated_at, privacy, username, 
+        GROUP_CONCAT(DISTINCT tag_name) AS tags
+          FROM posts
+          JOIN users ON posts.user_id = users.id
+          LEFT JOIN post_tags ON post_tags.post_id = posts.id
+          LEFT JOIN tags ON post_tags.tag_id = tags.id
+          WHERE posts.id IN (
+              SELECT post_tags.post_id
+              FROM post_tags
+              JOIN tags ON post_tags.tag_id = tags.id
+              WHERE tags.tag_name = '${req.query.tag}'
+          )
+          GROUP BY posts.id;`
+      : `SELECT posts.id AS post_id, user_id, title, content, views, posts.created_at, updated_at, privacy, username, 
+            GROUP_CONCAT(tag_name) AS tags 
+          FROM posts 
+          JOIN users ON posts.user_id = users.id 
+          LEFT JOIN post_tags ON post_tags.post_id = posts.id 
+          LEFT JOIN tags ON post_tags.tag_id = tags.id 
+          GROUP BY posts.id`;
+    db.query(q, (err, data) => {
+      if (err) return res.json(err);
+      return res.json(data);
+    });
+  })
 };
 
 export const getPost = (req, res) => {
@@ -150,7 +157,6 @@ export const deletePost = (req, res) => {
   jwt.verify(token, process.env.JWT_KEY, (err, userInfo) => {
     if (err) return res.status(403).json("Token is not valid!");
 
-    console.log([userInfo.id, req.params.id]);
     const q = "DELETE FROM posts where id=? AND user_id=?";
     db.query(q, [Number(req.params.id), userInfo.id], (err, data) => {
       if (err) res.json(err);

@@ -13,7 +13,7 @@ export default function Home() {
 
   const [posts, setPosts] = useState([]);
   const tag = location.search;
-  const { currentUser } = useContext(AuthContext);
+  const { currentUser, setCurrentUser } = useContext(AuthContext);
 
   const query = new URLSearchParams(location.search).get("q");
   const searchResult = location.state?.searchResults;
@@ -31,11 +31,14 @@ export default function Home() {
 
     const fetchPosts = async () => {
       try {
-        const res = await axios.get(`${SERVER}/posts/${tag}`);
+        const res = await axios.get(`${SERVER}/posts/${tag}`,{withCredentials: true});
         const sortedPosts = sortPostsByDate(res.data);
         setPosts(sortedPosts);
       } catch (err) {
-        console.log(err);
+        console.log(err.response.data);
+        setCurrentUser(null);
+        localStorage.removeItem("user");
+        window.location.reload()
       }
     };
     
