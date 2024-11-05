@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import Home from "./pages/Home";
@@ -7,11 +6,15 @@ import Navbar from "./components/Navbar";
 import Single from "./pages/Single"
 import Register from "./pages/Register"
 import Profile from "./pages/Profile"
+import Notif from "./components/Notif";
+import { useNotif } from "./context/NotifContext";
 
 const Layout = () => {
-  
+  const { error, success } = useNotif();
+
   return (
     <>
+      <Notif error={error} success={success} />
       <Navbar />
       <Outlet />
     </>

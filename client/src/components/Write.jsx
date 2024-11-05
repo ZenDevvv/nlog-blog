@@ -5,11 +5,14 @@ import "react-quill/dist/quill.snow.css";
 const SERVER = import.meta.env.VITE_DEV_SERVER;
 import { AuthContext } from "../context/AuthContext";
 import AddTagBtn from "./AddTagBtn";
+import { useNotif } from "../context/NotifContext";
 
 export default function Write({ setCreatePost, post }) {
   const [title, setTitle] = useState(post?.title || "");
   const [content, setContent] = useState(post?.content || "");
   const { currentUser } = useContext(AuthContext);
+
+  const { notifyError, notifySuccess } = useNotif();
 
   const [tags, setTags] = useState(post?.tags.split(",") || []);
 
@@ -25,7 +28,11 @@ export default function Write({ setCreatePost, post }) {
         content,
         tags,
       });
-      window.location.reload();
+      console.log(res.data.message)
+      notifySuccess(res.data.message);
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
     } catch (err) {
       console.log(err);
     }
@@ -39,7 +46,10 @@ export default function Write({ setCreatePost, post }) {
         content,
         tags,
       });
-      window.location.reload();
+      notifySuccess(res.data.message);
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
     } catch (err) {
       console.log(err);
     }

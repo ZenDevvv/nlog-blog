@@ -5,6 +5,7 @@ const SERVER = import.meta.env.VITE_DEV_SERVER;
 import { AuthContext } from "../context/AuthContext";
 import dayjs from "dayjs";
 import Write from "../components/Write";
+import Notif from "../components/Notif";
 
 // Helper function to format date
 const formatDate = (date) => {
@@ -110,6 +111,8 @@ export default function Single() {
         </p>
       </div>
       {createPost && <Write setCreatePost={setCreatePost} post={post} />}
+
+      
     </div>
   );
 }

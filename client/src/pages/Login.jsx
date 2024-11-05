@@ -5,16 +5,19 @@ const SERVER = import.meta.env.VITE_DEV_SERVER;
 import Notif from "../components/Notif";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useNotif } from "../context/NotifContext";
 
 export default function Login() {
   const [inputs, setInputs] = useState({
     username: "",
     password: "",
   });
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
+  const {notifyError, notifySuccess, error, success} = useNotif();
+
   const { currentUser, setCurrentUser } = useContext(AuthContext);
   const navigate = useNavigate();
+
+ 
 
 
   const handleChangeInput = (e) => {
@@ -27,14 +30,14 @@ export default function Login() {
       const res = await axios.post(`${SERVER}/auth/login`, inputs, {withCredentials: true});
       const {message, ...user} = res.data
       setCurrentUser(user);
-      setSuccess(message)
-      setError(null)
-      navigate('/')
+      notifySuccess(message)
+      setTimeout(() => {
+        navigate('/')
+      }, 2000);
 
     } catch (err) {
       console.log(err);
-      setSuccess(null)
-      setError(err.response.data.message)
+      notifyError(err.response.data.message)
     }
   };
 
@@ -88,7 +91,6 @@ export default function Login() {
           </a>
         </div>
       </div>
-
       <Notif error={error} success={success} />
     </div>
   );

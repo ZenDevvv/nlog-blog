@@ -30,8 +30,8 @@ export const getAllPost = (req, res) => {
           LEFT JOIN tags ON post_tags.tag_id = tags.id 
           GROUP BY posts.id`;
     db.query(q, (err, data) => {
-      if (err) return res.json(err);
-      return res.json(data);
+      if (err) return res.status(500).json(err);
+      return res.status(200).json(data);
     });
   })
 };
@@ -63,8 +63,8 @@ WHERE
 GROUP BY 
     posts.id;`;
   db.query(q, [postID], (err, data) => {
-    if (err) return res.json(err);
-    return res.json(data);
+    if (err) return res.status(500).json(err);
+    return res.status(200).json(data);
   });
 };
 
@@ -74,7 +74,7 @@ export const addPost = (req, res) => {
   const values = [req.params.id, req.body.title, req.body.content];
 
   db.query(q, values, (err, data) => {
-    if (err) return res.json(err);
+    if (err) return res.status(500).json(err);
 
     const postId = data.insertId;
     const tags = req.body.tags;
@@ -86,22 +86,22 @@ export const addPost = (req, res) => {
         const q =
           "INSERT INTO tags (tag_name) VALUES (?) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)";
         db.query(q, [tag], (err, data) => {
-          if (err) return res.json(err);
+          if (err) return res.status(500).json(err);
           const tagId = data.insertId;
           const insertToPostTagsQ =
             "INSERT INTO post_tags (post_id, tag_id) VALUES (?, ?)";
           db.query(insertToPostTagsQ, [postId, tagId], (err, data) => {
-            if (err) return res.json(err);
+            if (err) return res.status(500).json(err);
 
             insertCount++;
             if (insertCount === tags.length) {
-              return res.json("Added successfully");
+              return res.status(201).json({message: "Post Created"});
             }
           });
         });
       });
     } else {
-      return res.json("Added successfully");
+      return res.status(201).json({message: "Post Created"});
     }
   });
 };
@@ -112,7 +112,7 @@ export const editPost = (req, res) => {
   const values = [req.body.title, req.body.content, req.params.id];
 
   db.query(q, values, (err, data) => {
-    if (err) return res.json(err);
+    if (err) return res.status(500).json(err);
 
     const postId = req.params.id;
     const tags = req.body.tags;
@@ -122,30 +122,30 @@ export const editPost = (req, res) => {
       // First, delete existing tags for the post
       const deleteTagsQ = "DELETE FROM post_tags WHERE post_id=?";
       db.query(deleteTagsQ, [postId], (err) => {
-        if (err) return res.json(err);
+        if (err) return res.status(500).json(err);
 
         let insertCount = 0;
         tags.forEach((tag) => {
           const q =
             "INSERT INTO tags (tag_name) VALUES (?) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)";
           db.query(q, [tag], (err, data) => {
-            if (err) return res.json(err);
+            if (err) return res.status(500).json(err);
             const tagId = data.insertId;
             const insertToPostTagsQ =
               "INSERT INTO post_tags (post_id, tag_id) VALUES (?, ?)";
             db.query(insertToPostTagsQ, [postId, tagId], (err) => {
-              if (err) return res.json(err);
+              if (err) return res.status(500).json(err);
 
               insertCount++;
               if (insertCount === tags.length) {
-                return res.json("Post updated successfully");
+                return res.status(200).json({message: "Post updated successfully"});
               }
             });
           });
         });
       });
     } else {
-      return res.json("Post updated successfully");
+      return res.status(200).json("Post updated successfully");
     }
   });
 };
@@ -159,9 +159,9 @@ export const deletePost = (req, res) => {
 
     const q = "DELETE FROM posts where id=? AND user_id=?";
     db.query(q, [Number(req.params.id), userInfo.id], (err, data) => {
-      if (err) res.json(err);
+      if (err) return res.status(500).json(err);
       console.log(data);
-      return res.json("deleted successfully");
+      return res.status(200).json("deleted successfully");
     });
   });
 };
@@ -189,8 +189,8 @@ export const searchPosts = (req, res) => {
       `%${searchTerm}%`,
     ],
     (err, data) => {
-      if (err) return res.json(err);
-      return res.json(data);
+      if (err) return res.status(500).json(err);
+      return res.status(200).json(data);
     }
   );
 };
@@ -202,8 +202,8 @@ export const incrementViews = (req, res) => {
 `; 
 
   db.query(q, [postID], (err, data) => {
-    if (err) return res.json(err); 
-    return res.json("Views incremented successfully"); 
+    if (err) return res.status(500).json(err);
+    return res.status(200).json("Views incremented successfully");
   });
 };
 
@@ -219,7 +219,7 @@ export const trendingPosts = (req, res) => {
               ORDER BY views DESC;`
 
   db.query(q, (err, data) => {
-    if (err) return res.json(err);
-    return res.json(data);
+    if (err) return res.status(500).json(err);
+    return res.status(200).json(data);
   });
 };

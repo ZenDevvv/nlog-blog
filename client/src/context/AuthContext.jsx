@@ -6,7 +6,6 @@ export const AuthContextProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(
     JSON.parse(localStorage.getItem("user") || null)
   );
-  console.log(document.cookie);
 
   useEffect(() => {
     localStorage.setItem("user", JSON.stringify(currentUser));

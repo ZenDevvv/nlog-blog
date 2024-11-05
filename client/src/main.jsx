@@ -3,11 +3,14 @@ import { createRoot } from "react-dom/client";
 import App from "./App.jsx";
 import "./index.css";
 import { AuthContextProvider } from "./context/AuthContext";
+import { NotifProvider } from "./context/NotifContext";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <AuthContextProvider>
-      <App />
+      <NotifProvider>
+        <App />
+      </NotifProvider>
     </AuthContextProvider>
   </StrictMode>
 );
