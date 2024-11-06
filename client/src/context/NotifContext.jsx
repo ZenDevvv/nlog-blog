@@ -8,12 +8,12 @@ export const NotifProvider = ({ children }) => {
 
   const notifyError = (message) => {
     setError(message);
-    setTimeout(() => setError(null), 5000); // Clear after 5 seconds
+    setTimeout(() => setError(null), 2000); 
   };
 
   const notifySuccess = (message) => {
     setSuccess(message);
-    setTimeout(() => setSuccess(null), 5000); // Clear after 5 seconds
+    setTimeout(() => setSuccess(null), 2000); 
   };
 
   return (

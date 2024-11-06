@@ -5,7 +5,7 @@ export default function Notif({ error, success }) {
   return (
     <>
       {error && (
-        <div className="absolute top-0 w-full lg:right-0 lg:w-[6] z-100">
+        <div className="absolute top-0 w-full lg:right-0 lg:w-[6] z-50">
           <div className="flex justify-between items-center text-darkBg bg-[#FF5E5B] m-4 px-6 py-2 lg:m-12 lg:px-10 lg:py-6">
             <div>
               <p className="font-bold">FAILED</p>
@@ -17,7 +17,7 @@ export default function Notif({ error, success }) {
       )}
 
       {success && (
-        <div className="absolute top-0 w-full lg:right-0 lg:w-[600px] z-100">
+        <div className="absolute top-0 w-full lg:right-0 lg:w-[600px] z-50">
           <div className="flex justify-between items-center text-darkBg bg-primary m-4 px-6 py-2 lg:m-12 lg:px-10 lg:py-6">
             <div>
               <p className="font-bold">SUCCESS</p>

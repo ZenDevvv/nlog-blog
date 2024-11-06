@@ -6,15 +6,17 @@ const SERVER = import.meta.env.VITE_DEV_SERVER;
 import { AuthContext } from "../context/AuthContext";
 import AddTagBtn from "./AddTagBtn";
 import { useNotif } from "../context/NotifContext";
+import { useNavigate } from "react-router-dom";
 
 export default function Write({ setCreatePost, post }) {
   const [title, setTitle] = useState(post?.title || "");
   const [content, setContent] = useState(post?.content || "");
   const { currentUser } = useContext(AuthContext);
+  const navigate = useNavigate()
 
   const { notifyError, notifySuccess } = useNotif();
 
-  const [tags, setTags] = useState(post?.tags.split(",") || []);
+  const [tags, setTags] = useState(post?.tags?.split(",") || []);
 
   const modules = {
     toolbar: false,
@@ -28,11 +30,9 @@ export default function Write({ setCreatePost, post }) {
         content,
         tags,
       });
-      console.log(res.data.message)
       notifySuccess(res.data.message);
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
+      setCreatePost(false)
+      navigate("/")
     } catch (err) {
       console.log(err);
     }
@@ -47,9 +47,8 @@ export default function Write({ setCreatePost, post }) {
         tags,
       });
       notifySuccess(res.data.message);
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
+      setCreatePost(false)
+      navigate(`/`)
     } catch (err) {
       console.log(err);
     }
@@ -60,7 +59,7 @@ export default function Write({ setCreatePost, post }) {
       onClick={(e) =>
         e.target === e.currentTarget ? setCreatePost(false) : null
       }
-      className="fixed inset-0 flex justify-center items-center bg-darkBg bg-opacity-80 z-30"
+      className="fixed inset-0 flex justify-center items-center bg-darkBg bg-opacity-80 z-20"
     >
       <div className="bg-darkBg w-full m-6 p-6 border-2 border-primary rounded-md lg:max-w-[600px]">
         <div className="space-y-6">

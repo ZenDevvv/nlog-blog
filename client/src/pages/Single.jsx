@@ -5,7 +5,7 @@ const SERVER = import.meta.env.VITE_DEV_SERVER;
 import { AuthContext } from "../context/AuthContext";
 import dayjs from "dayjs";
 import Write from "../components/Write";
-import Notif from "../components/Notif";
+import { useNotif } from "../context/NotifContext";
 
 // Helper function to format date
 const formatDate = (date) => {
@@ -28,6 +28,7 @@ export default function Single() {
   const navigate = useNavigate();
   const [createPost, setCreatePost] = useState(false);
   const hasIncrementedViews = useRef(false);
+  const {notifySuccess, notifyError} = useNotif()
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -60,8 +61,8 @@ export default function Single() {
       const res = await axios.delete(`${SERVER}/posts/${postsID}`, {
         withCredentials: true,
       });
-      console.log(res);
-      navigate("/");
+      notifySuccess(res.data.message);
+      navigate('/')
     } catch (err) {
       console.log(err);
     }

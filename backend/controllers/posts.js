@@ -145,7 +145,7 @@ export const editPost = (req, res) => {
         });
       });
     } else {
-      return res.status(200).json("Post updated successfully");
+      return res.status(200).json({message: "Post updated successfully"});
     }
   });
 };
@@ -161,7 +161,7 @@ export const deletePost = (req, res) => {
     db.query(q, [Number(req.params.id), userInfo.id], (err, data) => {
       if (err) return res.status(500).json(err);
       console.log(data);
-      return res.status(200).json("deleted successfully");
+      return res.status(200).json({message: "deleted successfully"});
     });
   });
 };
