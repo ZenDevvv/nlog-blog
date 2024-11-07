@@ -21,7 +21,7 @@ db.connect((err) => {
     if(err){
         console.log(err)
     }else{
-        console.log("database connected suucessfully")
+        console.log("database connected successfully")
     }
 })
 

@@ -28,6 +28,8 @@ export const register = (req, res) => {
   });
 };
 
+const isProduction = process.env.NODE_ENV === "production";
+
 export const login = (req, res) => {
   const q = "SELECT * FROM users where username = ?";
   db.query(q, req.body.username, async (err, data) => {
@@ -43,22 +45,28 @@ export const login = (req, res) => {
       const token = jwt.sign({ id: data[0].id }, process.env.JWT_KEY);
       const { password, ...other } = data[0];
 
-      res.cookie("access_token", token, {
-        httpOnly: true,
-        sameSite: "none"
-      }).status(200).json({ message: "Login successfully", ...other })
-
+      res
+        .cookie("access_token", token, {
+          httpOnly: true,
+          secure: isProduction,
+          sameSite: isProduction ? "none" : "lax",
+        })
+        .status(200)
+        .json({ message: "Login successfully", ...other });
     } else {
       return res
         .status(401)
         .json({ message: "Incorrect username or password" });
     }
-  }); 
+  });
 };
 
 export const logout = (req, res) => {
-  console.log(res.cookies)
-  res.clearCookie("access_token", {
-    sameSite: "none",
-  }).status(200).json("User has been logged out");
+  res
+    .clearCookie("access_token", {
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
+    })
+    .status(200)
+    .json("User has been logged out");
 };

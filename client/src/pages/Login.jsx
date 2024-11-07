@@ -12,13 +12,10 @@ export default function Login() {
     username: "",
     password: "",
   });
-  const {notifyError, notifySuccess, error, success} = useNotif();
+  const { notifyError, notifySuccess, error, success } = useNotif();
 
   const { currentUser, setCurrentUser } = useContext(AuthContext);
   const navigate = useNavigate();
-
- 
-
 
   const handleChangeInput = (e) => {
     setInputs((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -26,18 +23,25 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const res = await axios.post(`${SERVER}/auth/login`, inputs, {withCredentials: true});
-      const {message, ...user} = res.data
-      setCurrentUser(user);
-      notifySuccess(message)
-      setTimeout(() => {
-        navigate('/')
-      }, 1500);
 
+    if (!inputs.username || !inputs.password) {
+      notifyError("Username and password are required");
+      return;
+    }
+
+    try {
+      const res = await axios.post(`${SERVER}/auth/login`, inputs, {
+        withCredentials: true,
+      });
+      const { message, ...user } = res.data;
+      setCurrentUser(user);
+      notifySuccess(message);
+      navigate("/");
     } catch (err) {
       console.log(err);
-      notifyError(err.response.data.message)
+      notifyError(
+        err.response?.data?.message || "Login failed. Please try again."
+      );
     }
   };
 
