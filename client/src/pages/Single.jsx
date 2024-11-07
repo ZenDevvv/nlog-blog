@@ -6,6 +6,7 @@ import { AuthContext } from "../context/AuthContext";
 import dayjs from "dayjs";
 import Write from "../components/Write";
 import { useNotif } from "../context/NotifContext";
+import { AnimatePresence, motion as m } from "framer-motion"; // Import motion from framer-motion
 
 // Helper function to format date
 const formatDate = (date) => {
@@ -28,11 +29,10 @@ export default function Single() {
   const navigate = useNavigate();
   const [createPost, setCreatePost] = useState(false);
   const hasIncrementedViews = useRef(false);
-  const {notifySuccess, notifyError} = useNotif()
+  const { notifySuccess, notifyError } = useNotif();
 
   useEffect(() => {
     const fetchPost = async () => {
-      console.log("single")
       try {
         const res = await axios.get(`${SERVER}/posts/${postsID}`);
         setPost(res.data[0]);
@@ -62,7 +62,7 @@ export default function Single() {
         withCredentials: true,
       });
       notifySuccess(res.data.message);
-      navigate('/')
+      navigate("/");
     } catch (err) {
       console.log(err);
     }
@@ -111,10 +111,8 @@ export default function Single() {
           {getText(post.content)}
         </p>
       </div>
-      {createPost && <Write setCreatePost={setCreatePost} post={post} />}
 
-      
+      <Write setCreatePost={setCreatePost} createPost={createPost} post={post} />
     </div>
   );
 }
- 

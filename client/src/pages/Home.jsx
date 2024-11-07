@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { Truncate } from "@re-dev/react-truncate";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
+import { motion as m } from "framer-motion"
 const SERVER = import.meta.env.VITE_DEV_SERVER;
 
 import { AuthContext } from "../context/AuthContext";

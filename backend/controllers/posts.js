@@ -148,7 +148,7 @@ export const editPost = (req, res) => {
       return res.status(200).json({message: "Post updated successfully"});
     }
   });
-};
+}; 
 
 export const deletePost = (req, res) => {
   const token = req.cookies.access_token;
@@ -160,7 +160,6 @@ export const deletePost = (req, res) => {
     const q = "DELETE FROM posts where id=? AND user_id=?";
     db.query(q, [Number(req.params.id), userInfo.id], (err, data) => {
       if (err) return res.status(500).json(err);
-      console.log(data);
       return res.status(200).json({message: "deleted successfully"});
     });
   });
@@ -196,7 +195,6 @@ export const searchPosts = (req, res) => {
 };
 
 export const incrementViews = (req, res) => {
-  console.log("increment")
   const postID = req.params.id; 
   const q = `UPDATE posts SET views = views + 1, updated_at = updated_at WHERE id = ?;
 `; 
@@ -208,7 +206,6 @@ export const incrementViews = (req, res) => {
 };
 
 export const trendingPosts = (req, res) => {
-  console.log("reached trending!")
   const q = `SELECT posts.id AS post_id, user_id, title, content, views, posts.created_at, updated_at, privacy, username, 
               GROUP_CONCAT(tags.tag_name) AS tags
               FROM posts 
