@@ -45,7 +45,7 @@ export const login = (req, res) => {
 
       res.cookie("access_token", token, {
         httpOnly: true,
-        sameSite: "lax"
+        sameSite: "none"
       }).status(200).json({ message: "Login successfully", ...other })
 
     } else {
@@ -59,6 +59,6 @@ export const login = (req, res) => {
 export const logout = (req, res) => {
   console.log(res.cookies)
   res.clearCookie("access_token", {
-    sameSite: "lax",
+    sameSite: "none",
   }).status(200).json("User has been logged out");
 };

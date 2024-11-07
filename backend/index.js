@@ -15,11 +15,11 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: process.env.CLIENT_SERVER,
     credentials: true,
   })
 );
-
+ 
 app.use("/auth", authRoutes);
 app.use("/posts", postsRoutes);
 app.get("/", (req, res) => {
