@@ -22,6 +22,9 @@ app.use(
 
 app.use("/auth", authRoutes);
 app.use("/posts", postsRoutes);
+app.get("/", (req, res) => {
+  return res.send("Open client @");
+});
 
 app.get("/profile/:id", (req, res) => {
   const userID = req.params.id;
