@@ -27,7 +27,7 @@ app.get("/", (req, res) => {
   try {
     res.json({ status: "Connected" });
   } catch (err) {
-    res.status(500).json({ error: "An error occurred" });
+    res.status(500).json(err);
   }
 });
 
