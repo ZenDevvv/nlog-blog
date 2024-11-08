@@ -9,7 +9,8 @@ import postsRoutes from "./routes/posts.js";
 import cookieParser from "cookie-parser";
 
 const app = express();
-const PORT = 8080;
+const port = process.env.PORT || 8080;
+
 
 app.use(express.json());
 app.use(cookieParser());
@@ -54,6 +55,6 @@ app.get("/profile/:id", (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log("listening to port", PORT);
+app.listen(port, () => {
+  console.log("listening to port", port);
 });
