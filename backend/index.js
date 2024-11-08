@@ -19,11 +19,16 @@ app.use(
     credentials: true,
   })
 );
- 
+
 app.use("/auth", authRoutes);
 app.use("/posts", postsRoutes);
+
 app.get("/", (req, res) => {
-  return res.send("Open client @");
+  try {
+    res.json({ status: "Connected" });
+  } catch (err) {
+    res.status(500).json({ error: "An error occurred" });
+  }
 });
 
 app.get("/profile/:id", (req, res) => {
