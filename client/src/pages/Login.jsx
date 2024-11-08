@@ -22,6 +22,7 @@ export default function Login() {
   useEffect(() => {
     const databaseConnect = async () => {
       try {
+        console.log(SERVER)
         const res = await axios.get(`${SERVER}/`);
         console.log(res.data);
         setDatabaseLoading(false);
