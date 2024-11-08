@@ -16,7 +16,6 @@ export const AuthContextProvider = ({ children }) => {
     } else {
       localStorage.removeItem("user"); // Clear when user is null
     }
-    console.log(currentUser);
   }, [currentUser]);
 
   return (

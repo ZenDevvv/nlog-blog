@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import sideImg from "../assets/auth/sidebg.png";
 import axios from "axios";
 const SERVER = import.meta.env.VITE_DEV_SERVER;
@@ -13,9 +13,28 @@ export default function Login() {
     password: "",
   });
   const { notifyError, notifySuccess, error, success } = useNotif();
-
   const { currentUser, setCurrentUser } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  const [databaseLoading, setDatabaseLoading] = useState(true);
+  const [databaseError, setDatabaseError] = useState(null);
+
+  useEffect(() => {
+    const databaseConnect = async () => {
+      try {
+        const res = await axios.get(`${SERVER}/`);
+        console.log(res.data);
+        setDatabaseLoading(false);
+        setDatabaseError(null);
+      } catch (err) {
+        console.error("Database connection error:", err);
+        setDatabaseLoading(false);
+        setDatabaseError("Failed to connect to the database.");
+      }
+    };
+
+    databaseConnect();
+  }, []);
 
   const handleChangeInput = (e) => {
     setInputs((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -38,7 +57,7 @@ export default function Login() {
       notifySuccess(message);
       navigate("/");
     } catch (err) {
-      console.log(err);
+      console.error("Login error:", err);
       notifyError(
         err.response?.data?.message || "Login failed. Please try again."
       );
@@ -47,7 +66,7 @@ export default function Login() {
 
   return (
     <div className="text-white h-screen flex justify-center items-center">
-      <div className="hidden lg:grid h-screen  lg:w-1/3 relative lg:place-content-center">
+      <div className="hidden lg:grid h-screen lg:w-1/3 relative lg:place-content-center">
         <img
           src={sideImg}
           alt=""
@@ -57,43 +76,50 @@ export default function Login() {
       </div>
 
       <div className="w-screen px-6 lg:w-2/3 lg:p-[8vw]">
-        <div className="text-center mb-14">
-          <h1 className="font-serif text-4xl">Welcome</h1>
-          <h2 className="font-thin text-2xl">Let's log you up quickly</h2>
-        </div>
+        {databaseLoading ? (
+          <p className="text-center">Connecting to database. Please wait...</p>
+        ) : databaseError ? (
+          <p className="text-center text-red-500">{databaseError}</p>
+        ) : (
+          <>
+            <div className="text-center mb-14">
+              <h1 className="font-serif text-4xl">Welcome</h1>
+              <h2 className="font-thin text-2xl">Let's log you up quickly</h2>
+            </div>
 
-        <form className="flex flex-col gap-4 mb-14">
-          <input
-            onChange={handleChangeInput}
-            name="username"
-            type="text"
-            placeholder="Enter your username"
-            className="bg-darkBg border border-primary p-4 text-sm font-light"
-          />
-          <input
-            onChange={handleChangeInput}
-            name="password"
-            type="password"
-            placeholder="Enter your password"
-            className="bg-darkBg border border-primary p-4 text-sm font-light"
-          />
-          <button
-            onClick={handleSubmit}
-            type="button"
-            className="bg-primary w-fit text-darkBg px-10 py-2 text-lg font-bold"
-          >
-            LOGIN
-          </button>
-        </form>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4 mb-14">
+              <input
+                onChange={handleChangeInput}
+                name="username"
+                type="text"
+                placeholder="Enter your username"
+                className="bg-darkBg border border-primary p-4 text-sm font-light"
+              />
+              <input
+                onChange={handleChangeInput}
+                name="password"
+                type="password"
+                placeholder="Enter your password"
+                className="bg-darkBg border border-primary p-4 text-sm font-light"
+              />
+              <button
+                type="submit"
+                className="bg-primary w-fit text-darkBg px-10 py-2 text-lg font-bold"
+              >
+                LOGIN
+              </button>
+            </form>
 
-        <div>
-          <p>
-            don't have an accounts<span className="text-primary">?</span>
-          </p>
-          <a href="/register" className="text-primary">
-            sign-up
-          </a>
-        </div>
+            <div>
+              <p>
+                Don't have an account?<span className="text-primary">?</span>
+              </p>
+              <a href="/register" className="text-primary">
+                Sign-up
+              </a>
+            </div>
+          </>
+        )}
       </div>
       <Notif error={error} success={success} />
     </div>

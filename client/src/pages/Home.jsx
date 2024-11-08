@@ -27,7 +27,6 @@ export default function Home() {
   };
 
   useEffect(() => {
-    console.log("currentUser:", currentUser)
     if (!currentUser) {
       setTimeout(() => {
         navigate("/login");
