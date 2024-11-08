@@ -110,6 +110,8 @@ export default function Login() {
               </button>
             </form>
 
+          </>
+        )}
             <div>
               <p>
                 Don't have an account?<span className="text-primary">?</span>
@@ -118,8 +120,6 @@ export default function Login() {
                 Sign-up
               </a>
             </div>
-          </>
-        )}
       </div>
       <Notif error={error} success={success} />
     </div>
