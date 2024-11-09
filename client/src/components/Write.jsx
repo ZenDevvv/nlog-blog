@@ -30,8 +30,17 @@ export default function Write({ setCreatePost, createPost, post }) {
     toolbar: false,
   };
 
+  const areFieldsEmpty = () => {
+    if (!title || !content) {
+      notifyError("Title and content are required");
+      return true;
+    }
+    return false;
+  };
+
   const submitPost = async (e) => {
     e.preventDefault();
+    if(areFieldsEmpty()) return;
     try {
       const res = await axios.post(`${SERVER}/posts/${currentUser.id}`, {
         title,
@@ -40,7 +49,6 @@ export default function Write({ setCreatePost, createPost, post }) {
       });
       notifySuccess(res.data.message);
       setCreatePost(false);
-      navigate("/");
     } catch (err) {
       console.log(err);
     }
@@ -48,6 +56,8 @@ export default function Write({ setCreatePost, createPost, post }) {
 
   const editPost = async (e) => {
     e.preventDefault();
+    if(areFieldsEmpty()) return;
+
     try {
       const res = await axios.put(`${SERVER}/posts/${post.id}`, {
         title,
@@ -74,8 +84,8 @@ export default function Write({ setCreatePost, createPost, post }) {
           className="fixed inset-0 flex justify-center items-center bg-darkBg bg-opacity-80 z-20"
         >
           <m.div
-            initial={{ scale: 0}}
-            animate={{ scale: 1}}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
             exit={{ scale: 0, transition: { duration: 0.1 } }}
             transition={{ type: "spring", duration: 0.7 }}
             className="bg-darkBg w-full m-6 p-6 border-2 border-primary rounded-md lg:max-w-[600px]"

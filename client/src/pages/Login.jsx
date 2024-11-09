@@ -22,7 +22,7 @@ export default function Login() {
   useEffect(() => {
     const databaseConnect = async () => {
       try {
-        console.log(SERVER)
+        console.log(SERVER);
         const res = await axios.get(`${SERVER}/`);
         console.log(res.data);
         setDatabaseLoading(false);
@@ -111,8 +111,6 @@ export default function Login() {
               </button>
             </form>
 
-          </>
-        )}
             <div>
               <p>
                 Don't have an account?<span className="text-primary">?</span>
@@ -121,6 +119,8 @@ export default function Login() {
                 Sign-up
               </a>
             </div>
+          </>
+        )}
       </div>
       <Notif error={error} success={success} />
     </div>
