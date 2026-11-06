@@ -1,16 +1,14 @@
 import axios from "axios";
-import React, { useContext, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 const SERVER = import.meta.env.VITE_DEV_SERVER;
-import { AuthContext } from "../context/AuthContext";
 import AddTagBtn from "./AddTagBtn";
 import { useNotif } from "../context/NotifContext";
 import { useNavigate } from "react-router-dom";
 import { motion as m, AnimatePresence } from "framer-motion";
 
 export default function Write({ setCreatePost, createPost, post }) {
-  const { currentUser } = useContext(AuthContext);
   const navigate = useNavigate();
   const { notifyError, notifySuccess } = useNotif();
 
@@ -42,15 +40,16 @@ export default function Write({ setCreatePost, createPost, post }) {
     e.preventDefault();
     if(areFieldsEmpty()) return;
     try {
-      const res = await axios.post(`${SERVER}/posts/${currentUser.id}`, {
-        title,
-        content,
-        tags,
-      });
+      const res = await axios.post(
+        `${SERVER}/posts`,
+        { title, content, tags },
+        { withCredentials: true }
+      );
       notifySuccess(res.data.message);
       setCreatePost(false);
     } catch (err) {
       console.log(err);
+      notifyError(err.response?.data?.message || "Could not save the post");
     }
   };
 
@@ -59,16 +58,17 @@ export default function Write({ setCreatePost, createPost, post }) {
     if(areFieldsEmpty()) return;
 
     try {
-      const res = await axios.put(`${SERVER}/posts/${post.id}`, {
-        title,
-        content,
-        tags,
-      });
+      const res = await axios.put(
+        `${SERVER}/posts/${post.id}`,
+        { title, content, tags },
+        { withCredentials: true }
+      );
       notifySuccess(res.data.message);
       setCreatePost(false);
       navigate(`/`);
     } catch (err) {
       console.log(err);
+      notifyError(err.response?.data?.message || "Could not save the post");
     }
   };
 

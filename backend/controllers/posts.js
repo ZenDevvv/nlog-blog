@@ -1,15 +1,14 @@
 import db from "../dbconfig.js";
-import jwt from "jsonwebtoken";
+import { serverError } from "../errors.js";
 
 export const getAllPost = (req, res) => {
-  const token = req.cookies.access_token;
-  if (!token) return res.status(401).json("Not Authenticated!");
+  const { tag } = req.query;
+  if (tag !== undefined && typeof tag !== "string") {
+    return res.status(400).json({ message: "Invalid tag" });
+  }
 
-  jwt.verify(token, process.env.JWT_KEY, (err, userInfo) => {
-    if (err) return res.status(403).json("Token is not valid!");
-
-    const q = req.query.tag
-      ? `SELECT posts.id AS post_id, user_id, title, content, views, posts.created_at, posts.updated_at, privacy, username, 
+  const q = tag
+    ? `SELECT posts.id AS post_id, user_id, title, content, views, posts.created_at, posts.updated_at, privacy, username, 
         GROUP_CONCAT(DISTINCT tag_name) AS tags
           FROM posts
           JOIN users ON posts.user_id = users.id
@@ -19,21 +18,21 @@ export const getAllPost = (req, res) => {
               SELECT post_tags.post_id
               FROM post_tags
               JOIN tags ON post_tags.tag_id = tags.id
-              WHERE tags.tag_name = '${req.query.tag}'
+              WHERE tags.tag_name = ?
           )
           GROUP BY posts.id;`
-      : `SELECT posts.id AS post_id, user_id, title, content, views, posts.created_at, updated_at, privacy, username, 
+    : `SELECT posts.id AS post_id, user_id, title, content, views, posts.created_at, updated_at, privacy, username, 
             GROUP_CONCAT(tag_name) AS tags 
           FROM posts 
           JOIN users ON posts.user_id = users.id 
           LEFT JOIN post_tags ON post_tags.post_id = posts.id 
           LEFT JOIN tags ON post_tags.tag_id = tags.id 
           GROUP BY posts.id`;
-    db.query(q, (err, data) => {
-      if (err) return res.status(500).json(err);
-      return res.status(200).json(data);
-    });
-  })
+
+  db.query(q, tag ? [tag] : [], (err, data) => {
+    if (err) return serverError(res, err);
+    return res.status(200).json(data);
+  });
 };
 
 export const getPost = (req, res) => {
@@ -63,112 +62,86 @@ WHERE
 GROUP BY 
     posts.id;`;
   db.query(q, [postID], (err, data) => {
-    if (err) return res.status(500).json(err);
+    if (err) return serverError(res, err);
     return res.status(200).json(data);
   });
 };
 
-export const addPost = (req, res) => {
-  const q =
-    "INSERT INTO posts (`user_id`, `title`, `content`, `created_at`, `updated_at`) VALUES(?,?,?,NOW(), NOW())";
-  const values = [req.params.id, req.body.title, req.body.content];
+const isText = (value) => typeof value === "string" && value.trim().length > 0;
 
-  db.query(q, values, (err, data) => {
-    if (err) return res.status(500).json(err);
+// The body of a create or edit: title and content are text, tags an optional list of text.
+const isValidPost = ({ title, content, tags }) =>
+  isText(title) && isText(content) && (tags === undefined || (Array.isArray(tags) && tags.every(isText)));
 
-    const postId = data.insertId;
-    const tags = req.body.tags;
-
-    if (tags && tags.length > 0) {
-      let insertCount = 0;
-
-      tags.forEach((tag) => {
-        const q =
-          "INSERT INTO tags (tag_name) VALUES (?) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)";
-        db.query(q, [tag], (err, data) => {
-          if (err) return res.status(500).json(err);
-          const tagId = data.insertId;
-          const insertToPostTagsQ =
-            "INSERT INTO post_tags (post_id, tag_id) VALUES (?, ?)";
-          db.query(insertToPostTagsQ, [postId, tagId], (err, data) => {
-            if (err) return res.status(500).json(err);
-
-            insertCount++;
-            if (insertCount === tags.length) {
-              return res.status(201).json({message: "Post Created"});
-            }
-          });
-        });
-      });
-    } else {
-      return res.status(201).json({message: "Post Created"});
-    }
-  });
+const saveTags = async (postId, tags) => {
+  for (const tag of new Set(tags)) {
+    const [saved] = await db
+      .promise()
+      .query("INSERT INTO tags (tag_name) VALUES (?) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)", [tag]);
+    await db.promise().query("INSERT INTO post_tags (post_id, tag_id) VALUES (?, ?)", [postId, saved.insertId]);
+  }
 };
 
-export const editPost = (req, res) => {
-  const q =
-    "UPDATE posts SET `title`=?, `content`=?, `updated_at`=NOW() WHERE id=?";
-  const values = [req.body.title, req.body.content, req.params.id];
+export const addPost = async (req, res) => {
+  if (!isValidPost(req.body)) return res.status(400).json({ message: "Title and content are required" });
+  const { title, content, tags = [] } = req.body;
 
-  db.query(q, values, (err, data) => {
-    if (err) return res.status(500).json(err);
+  try {
+    const [post] = await db
+      .promise()
+      .query("INSERT INTO posts (`user_id`, `title`, `content`, `created_at`, `updated_at`) VALUES(?,?,?,NOW(), NOW())", [
+        req.user.id,
+        title,
+        content,
+      ]);
+    await saveTags(post.insertId, tags);
+    return res.status(201).json({ message: "Post Created" });
+  } catch (err) {
+    return serverError(res, err);
+  }
+};
 
-    const postId = req.params.id;
-    const tags = req.body.tags;
+export const editPost = async (req, res) => {
+  if (!isValidPost(req.body)) return res.status(400).json({ message: "Title and content are required" });
+  const { title, content, tags = [] } = req.body;
+  const postId = req.params.id;
 
-    // Handle tags if provided
-    if (tags && tags.length > 0) {
-      // First, delete existing tags for the post
-      const deleteTagsQ = "DELETE FROM post_tags WHERE post_id=?";
-      db.query(deleteTagsQ, [postId], (err) => {
-        if (err) return res.status(500).json(err);
+  try {
+    const [updated] = await db
+      .promise()
+      .query("UPDATE posts SET `title`=?, `content`=?, `updated_at`=NOW() WHERE id=? AND user_id=?", [
+        title,
+        content,
+        postId,
+        req.user.id,
+      ]);
+    if (updated.affectedRows === 0) return res.status(404).json({ message: "Post not found" });
 
-        let insertCount = 0;
-        tags.forEach((tag) => {
-          const q =
-            "INSERT INTO tags (tag_name) VALUES (?) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)";
-          db.query(q, [tag], (err, data) => {
-            if (err) return res.status(500).json(err);
-            const tagId = data.insertId;
-            const insertToPostTagsQ =
-              "INSERT INTO post_tags (post_id, tag_id) VALUES (?, ?)";
-            db.query(insertToPostTagsQ, [postId, tagId], (err) => {
-              if (err) return res.status(500).json(err);
-
-              insertCount++;
-              if (insertCount === tags.length) {
-                return res.status(200).json({message: "Post updated successfully"});
-              }
-            });
-          });
-        });
-      });
-    } else {
-      return res.status(200).json({message: "Post updated successfully"});
+    if (tags.length > 0) {
+      await db.promise().query("DELETE FROM post_tags WHERE post_id=?", [postId]);
+      await saveTags(postId, tags);
     }
-  });
-}; 
+    return res.status(200).json({ message: "Post updated successfully" });
+  } catch (err) {
+    return serverError(res, err);
+  }
+};
 
 export const deletePost = (req, res) => {
-  const token = req.cookies.access_token;
-  if (!token) return res.status(401).json("Not Authenticated!");
-
-  jwt.verify(token, process.env.JWT_KEY, (err, userInfo) => {
-    if (err) return res.status(403).json("Token is not valid!");
-
-    const q = "DELETE FROM posts where id=? AND user_id=?";
-    db.query(q, [Number(req.params.id), userInfo.id], (err, data) => {
-      if (err) return res.status(500).json(err);
-      return res.status(200).json({message: "deleted successfully"});
-    });
+  const q = "DELETE FROM posts where id=? AND user_id=?";
+  db.query(q, [req.params.id, req.user.id], (err, data) => {
+    if (err) return serverError(res, err);
+    if (data.affectedRows === 0) return res.status(404).json({ message: "Post not found" });
+    return res.status(200).json({ message: "deleted successfully" });
   });
 };
 
 export const searchPosts = (req, res) => {
   console.log("search post!");
   const searchTerm = req.query.q; // Get the search term from query parameters
-  if (!searchTerm) return res.status(400).json("Search term is required!");
+  if (typeof searchTerm !== "string" || !searchTerm) {
+    return res.status(400).json({ message: "Search term is required" });
+  }
 
   const q = `SELECT posts.id AS post_id, user_id, title, content, views, posts.created_at, posts.updated_at, privacy, users.username, 
               GROUP_CONCAT(DISTINCT tags.tag_name) AS tags
@@ -188,7 +161,7 @@ export const searchPosts = (req, res) => {
       `%${searchTerm}%`,
     ],
     (err, data) => {
-      if (err) return res.status(500).json(err);
+      if (err) return serverError(res, err);
       return res.status(200).json(data);
     }
   );
@@ -200,7 +173,7 @@ export const incrementViews = (req, res) => {
 `; 
 
   db.query(q, [postID], (err, data) => {
-    if (err) return res.status(500).json(err);
+    if (err) return serverError(res, err);
     return res.status(200).json("Views incremented successfully");
   });
 };
@@ -216,7 +189,7 @@ export const trendingPosts = (req, res) => {
               ORDER BY views DESC;`
 
   db.query(q, (err, data) => {
-    if (err) return res.status(500).json(err);
+    if (err) return serverError(res, err);
     return res.status(200).json(data);
   });
 };

@@ -7,6 +7,7 @@ import cors from "cors";
 import authRoutes from "./routes/auth.js";
 import postsRoutes from "./routes/posts.js";
 import cookieParser from "cookie-parser";
+import { serverError } from "./errors.js";
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -25,11 +26,7 @@ app.use("/auth", authRoutes);
 app.use("/posts", postsRoutes);
 
 app.get("/", (req, res) => {
-  try {
-    res.json({ status: "Connected" });
-  } catch (err) {
-    res.status(500).json(err);
-  }
+  res.json({ status: "Connected" });
 });
 
 app.get("/profile/:id", (req, res) => {
@@ -48,7 +45,7 @@ app.get("/profile/:id", (req, res) => {
               GROUP BY users.id, posts.id;`;
 
   db.query(q, [userID], (err, data) => {
-    if (err) return res.json(err);
+    if (err) return serverError(res, err);
 
     // Directly return the data
     return res.json(data);

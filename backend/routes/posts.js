@@ -9,20 +9,21 @@ import {
   incrementViews,
   trendingPosts,
 } from "../controllers/posts.js";
+import { requireAuth } from "../middleware/auth.js";
 
 const router = express.Router();
 
 router.get("/trending", trendingPosts)
 router.get("/search", searchPosts);
-router.get("/", getAllPost);
+router.get("/", requireAuth, getAllPost);
 router.get("/:id", getPost);
 
-router.post("/:id", addPost);
+router.post("/", requireAuth, addPost);
 
-router.put("/:id", editPost);
+router.put("/:id", requireAuth, editPost);
 router.put("/:id/increment-views", incrementViews);
 
-router.delete("/:id", deletePost);
+router.delete("/:id", requireAuth, deletePost);
 
 
 export default router;
