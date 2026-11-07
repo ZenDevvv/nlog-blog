@@ -1,4 +1,4 @@
-import sideImg from "../assets/auth/sidebg.png";
+import MarbleInk from "../components/MarbleInk";
 import React, { useState } from "react";
 const SERVER = import.meta.env.VITE_DEV_SERVER;
 import axios from "axios";
@@ -41,12 +41,8 @@ export default function Register() {
   return (
     <div className="relative text-white h-screen flex justify-center items-center">
       <div className="hidden lg:grid h-screen  lg:w-1/3 relative lg:place-content-center">
-        <img
-          src={sideImg}
-          alt=""
-          className="object-cover h-full w-full absolute"
-        />
-        <h1 className="text-white text-7xl z-10 font-bold -rotate-90">
+        <MarbleInk />
+        <h1 className="bg-darkBg px-8 py-3 text-white text-7xl z-10 font-bold -rotate-90">
           Sign Up
         </h1>
       </div>
@@ -54,7 +50,7 @@ export default function Register() {
       <div className="w-screen px-6 lg:w-2/3 lg:p-[8vw]">
         <div className="text-center mb-14">
           <h1 className="font-serif text-4xl">Welcome</h1>
-          <h2 className="font-thin text-2xl">Let's sign you you up quickly</h2>
+          <h2 className="font-thin text-2xl">Let's sign you up quickly</h2>
         </div>
 
         <form className="flex flex-col gap-4 mb-14">
@@ -96,7 +92,7 @@ export default function Register() {
 
         <div>
           <p>
-            don't have an accounts<span className="text-primary">?</span>
+            Already have an account<span className="text-primary">?</span>
           </p>
           <a href="/login" className="text-primary">
             log-in

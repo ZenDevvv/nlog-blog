@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import sideImg from "../assets/auth/sidebg.png";
+import MarbleInk from "../components/MarbleInk";
 import axios from "axios";
 const SERVER = import.meta.env.VITE_DEV_SERVER;
 import Notif from "../components/Notif";
@@ -68,12 +68,8 @@ export default function Login() {
   return (
     <div className="text-white h-screen flex justify-center items-center">
       <div className="hidden lg:grid h-screen lg:w-1/3 relative lg:place-content-center">
-        <img
-          src={sideImg}
-          alt=""
-          className="object-cover h-full w-full absolute"
-        />
-        <h1 className="text-white text-7xl z-10 font-bold -rotate-90">Login</h1>
+        <MarbleInk />
+        <h1 className="bg-darkBg px-8 py-3 text-white text-7xl z-10 font-bold -rotate-90">Login</h1>
       </div>
 
       <div className="w-screen px-6 lg:w-2/3 lg:p-[8vw]">
@@ -113,7 +109,7 @@ export default function Login() {
 
             <div>
               <p>
-                Don't have an account?<span className="text-primary">?</span>
+                Don't have an account<span className="text-primary">?</span>
               </p>
               <a href="/register" className="text-primary">
                 Sign-up
