@@ -1,8 +1,7 @@
 import { postError } from "../validation";
 import axios from "axios";
 import React, { useState, useEffect } from "react";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
+import RichTextEditor from "./RichTextEditor";
 const SERVER = import.meta.env.VITE_DEV_SERVER;
 import AddTagBtn from "./AddTagBtn";
 import { useNotif } from "../context/NotifContext";
@@ -24,10 +23,6 @@ export default function Write({ setCreatePost, createPost, post }) {
       setTags(post.tags?.split(",") || []);
     }
   }, [post]);
-
-  const modules = {
-    toolbar: false,
-  };
 
   const areFieldsEmpty = () => {
     const validationError = postError(title, content, tags);
@@ -106,13 +101,11 @@ export default function Write({ setCreatePost, createPost, post }) {
                   value={title}
                 />
                 <div className="border-l border-primary h-[300px]">
-                  <ReactQuill
+                  <RichTextEditor
                     className="h-full font-serif custom-quill"
-                    theme="snow"
                     value={content}
                     onChange={setContent}
                     placeholder="What's on your mind?"
-                    modules={modules}
                   />
                 </div>
 
