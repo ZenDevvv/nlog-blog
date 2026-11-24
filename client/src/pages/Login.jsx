@@ -1,3 +1,4 @@
+import { accountError } from "../validation";
 import React, { useContext, useEffect, useState } from "react";
 import MarbleInk from "../components/MarbleInk";
 import axios from "axios";
@@ -44,10 +45,8 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!inputs.username || !inputs.password) {
-      notifyError("Username and password are required");
-      return;
-    }
+    const validationError = accountError(inputs);
+    if (validationError) { notifyError(validationError); return; }
 
     try {
       const res = await axios.post(`${SERVER}/auth/login`, inputs, {
@@ -88,6 +87,7 @@ export default function Login() {
               <input
                 onChange={handleChangeInput}
                 name="username"
+                required maxLength={255}
                 type="text"
                 placeholder="Enter your username"
                 className="bg-darkBg border border-primary p-4 text-sm font-light"
@@ -95,6 +95,7 @@ export default function Login() {
               <input
                 onChange={handleChangeInput}
                 name="password"
+                required maxLength={72}
                 type="password"
                 placeholder="Enter your password"
                 className="bg-darkBg border border-primary p-4 text-sm font-light"

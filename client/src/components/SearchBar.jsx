@@ -1,3 +1,4 @@
+import { useNotif } from "../context/NotifContext";
 import axios from "axios";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -5,21 +6,24 @@ const SERVER = import.meta.env.VITE_DEV_SERVER;
 import { AnimatePresence, motion as m } from "framer-motion";
 
 export default function SearchBar({ setOpenSearchBar, openSearchBar }) {
+  const { notifyError } = useNotif();
   const [searchInput, setSearchInput] = useState("");
   const navigate = useNavigate();
 
   const handleSearch = async (e) => {
     e.preventDefault();
 
+    const term = searchInput.trim();
+    if (!term || term.length > 200) { notifyError("Search term must be 1–200 characters"); return; }
     try {
-      const res = await axios.get(`${SERVER}/posts/search?q=${searchInput}`);
+      const res = await axios.get(`${SERVER}/posts/search?q=${encodeURIComponent(term)}`);
       console.log(res.data);
-      navigate(`/posts/search?q=${searchInput}`, {
+      navigate(`/posts/search?q=${encodeURIComponent(term)}`, {
         state: { searchResults: res.data },
       });
       setOpenSearchBar(false);
     } catch (err) {
-      console.log(err);
+      notifyError(err.response?.data?.message || "Search failed");
     }
   };
 
@@ -45,6 +49,7 @@ export default function SearchBar({ setOpenSearchBar, openSearchBar }) {
               onChange={(e) => setSearchInput(e.target.value)}
               className="flex-1 md:text-lg bg-gray-700 p-4 rounded-tl-md rounded-bl-md  lg:p-6 focus:outline-none"
               type="text"
+              maxLength={200}
               placeholder="Search"
             />
             <button

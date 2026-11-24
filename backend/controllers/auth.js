@@ -6,13 +6,12 @@ import { serverError } from "../errors.js";
 const isProduction = process.env.NODE_ENV === "production";
 const SESSION_DAYS = 7;
 
-const isText = (value) => typeof value === "string" && value.length > 0;
+import { validateAuth } from "../validation.js";
 
 export const register = async (req, res) => {
-  const { username, email, password } = req.body;
-  if (![username, email, password].every(isText)) {
-    return res.status(400).json({ message: "Username, email and password are required" });
-  }
+  const result = validateAuth(req.body, true);
+  if (result.error) return res.status(400).json({ message: result.error });
+  const { username, email, password } = result.value;
 
   try {
     const [existing] = await db
@@ -29,15 +28,15 @@ export const register = async (req, res) => {
       );
     return res.status(201).json({ message: "Registered successfully" });
   } catch (err) {
+    if (err.code === "ER_DUP_ENTRY") return res.status(409).json({ message: "User already exists!" });
     return serverError(res, err);
   }
 };
 
 export const login = async (req, res) => {
-  const { username, password } = req.body;
-  if (![username, password].every(isText)) {
-    return res.status(400).json({ message: "Username and password are required" });
-  }
+  const result = validateAuth(req.body);
+  if (result.error) return res.status(400).json({ message: result.error });
+  const { username, password } = result.value;
 
   try {
     const [users] = await db.promise().query("SELECT * FROM users WHERE username = ?", [username]);

@@ -11,7 +11,10 @@ import {
 } from "../controllers/posts.js";
 import { requireAuth } from "../middleware/auth.js";
 
+import { validateId } from "../validation.js";
+
 const router = express.Router();
+router.param("id", (req, res, next) => validateId(req, res, next));
 
 router.get("/trending", trendingPosts)
 router.get("/search", searchPosts);

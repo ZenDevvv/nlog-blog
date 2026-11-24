@@ -1,3 +1,4 @@
+import { postError } from "../validation";
 import axios from "axios";
 import React, { useState, useEffect } from "react";
 import ReactQuill from "react-quill";
@@ -29,8 +30,9 @@ export default function Write({ setCreatePost, createPost, post }) {
   };
 
   const areFieldsEmpty = () => {
-    if (!title || !content) {
-      notifyError("Title and content are required");
+    const validationError = postError(title, content, tags);
+    if (validationError) {
+      notifyError(validationError);
       return true;
     }
     return false;
@@ -99,6 +101,7 @@ export default function Write({ setCreatePost, createPost, post }) {
                   className="px-4 py-2 bg-darkBg border-l border-primary w-full focus:outline-none"
                   type="text"
                   placeholder="Write your title"
+                  maxLength={200}
                   onChange={(e) => setTitle(e.target.value)}
                   value={title}
                 />

@@ -9,11 +9,13 @@ import postsRoutes from "./routes/posts.js";
 import cookieParser from "cookie-parser";
 import { serverError } from "./errors.js";
 
+import { validateId } from "./validation.js";
+
 const app = express();
 const port = process.env.PORT || 8080;
 
 
-app.use(express.json());
+app.use(express.json({ limit: "100kb" }));
 app.use(cookieParser());
 app.use(
   cors({
@@ -29,7 +31,7 @@ app.get("/", (req, res) => {
   res.json({ status: "Connected" });
 });
 
-app.get("/profile/:id", (req, res) => {
+app.get("/profile/:id", validateId, (req, res) => {
   const userID = req.params.id;
 
   const q = `SELECT users.id, users.username, users.created_at, 
@@ -50,6 +52,12 @@ app.get("/profile/:id", (req, res) => {
     // Directly return the data
     return res.json(data);
   });
+});
+
+app.use((err, req, res, next) => {
+  if (err.type === "entity.too.large") return res.status(413).json({ message: "Request body is too large (maximum 100 KB)" });
+  if (err.type === "entity.parse.failed") return res.status(400).json({ message: "Invalid JSON body" });
+  return serverError(res, err);
 });
 
 app.listen(port, () => {

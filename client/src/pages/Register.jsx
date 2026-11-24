@@ -1,3 +1,4 @@
+import { accountError } from "../validation";
 import MarbleInk from "../components/MarbleInk";
 import React, { useState } from "react";
 const SERVER = import.meta.env.VITE_DEV_SERVER;
@@ -25,6 +26,8 @@ export default function Register() {
       setError("Passwords do not match");
       return;
     }
+    const validationError = accountError(inputs, true);
+    if (validationError) { setError(validationError); return; }
     setError(null);
     try {
       const res = await axios.post(`${SERVER}/auth/register`, inputs);
@@ -34,7 +37,7 @@ export default function Register() {
     } catch (err) {
       setSuccess(null)
       console.log(err);
-      setError(err.response.data.message);
+      setError(err.response?.data?.message || "Could not register. Please try again.");
     }
   };
 
@@ -53,10 +56,11 @@ export default function Register() {
           <h2 className="font-thin text-2xl">Let's sign you up quickly</h2>
         </div>
 
-        <form className="flex flex-col gap-4 mb-14">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 mb-14">
           <input
             onChange={handleChangeInput}
             name="username"
+            required minLength={3} maxLength={30} pattern="[A-Za-z0-9_]{3,30}"
             type="text"
             placeholder="Enter your username"
             className="bg-darkBg border border-primary p-4 text-sm font-light"
@@ -64,6 +68,7 @@ export default function Register() {
           <input
             onChange={handleChangeInput}
             name="email"
+            required maxLength={254}
             type="email"
             placeholder="Enter your email"
             className="bg-darkBg border border-primary p-4 text-sm font-light"
@@ -71,6 +76,7 @@ export default function Register() {
           <input
             onChange={handleChangeInput}
             name="password"
+            required minLength={8} maxLength={72}
             type="password"
             placeholder="Enter your password"
             className="bg-darkBg border border-primary p-4 text-sm font-light"
@@ -78,12 +84,13 @@ export default function Register() {
           <input
             onChange={handleChangeInput}
             name="confirmPassword"
+            required minLength={8} maxLength={72}
             type="password"
             placeholder="Confirm your password"
             className="bg-darkBg border border-primary p-4 text-sm font-light"
           />
           <button
-            onClick={handleSubmit}
+            type="submit"
             className="bg-primary w-fit text-darkBg px-10 py-2 text-lg font-bold"
           >
             SIGNUP

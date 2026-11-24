@@ -1,9 +1,10 @@
 import db from "../dbconfig.js";
+import { validatePost, validTag } from "../validation.js";
 import { serverError } from "../errors.js";
 
 export const getAllPost = (req, res) => {
   const { tag } = req.query;
-  if (tag !== undefined && typeof tag !== "string") {
+  if (tag !== undefined && !validTag(tag)) {
     return res.status(400).json({ message: "Invalid tag" });
   }
 
@@ -67,12 +68,6 @@ GROUP BY
   });
 };
 
-const isText = (value) => typeof value === "string" && value.trim().length > 0;
-
-// The body of a create or edit: title and content are text, tags an optional list of text.
-const isValidPost = ({ title, content, tags }) =>
-  isText(title) && isText(content) && (tags === undefined || (Array.isArray(tags) && tags.every(isText)));
-
 const saveTags = async (postId, tags) => {
   for (const tag of new Set(tags)) {
     const [saved] = await db
@@ -83,8 +78,9 @@ const saveTags = async (postId, tags) => {
 };
 
 export const addPost = async (req, res) => {
-  if (!isValidPost(req.body)) return res.status(400).json({ message: "Title and content are required" });
-  const { title, content, tags = [] } = req.body;
+  const result = validatePost(req.body);
+  if (result.error) return res.status(400).json({ message: result.error });
+  const { title, content, tags } = result.value;
 
   try {
     const [post] = await db
@@ -102,8 +98,9 @@ export const addPost = async (req, res) => {
 };
 
 export const editPost = async (req, res) => {
-  if (!isValidPost(req.body)) return res.status(400).json({ message: "Title and content are required" });
-  const { title, content, tags = [] } = req.body;
+  const result = validatePost(req.body);
+  if (result.error) return res.status(400).json({ message: result.error });
+  const { title, content, tags } = result.value;
   const postId = req.params.id;
 
   try {
@@ -117,7 +114,7 @@ export const editPost = async (req, res) => {
       ]);
     if (updated.affectedRows === 0) return res.status(404).json({ message: "Post not found" });
 
-    if (tags.length > 0) {
+    if (req.body.tags !== undefined) {
       await db.promise().query("DELETE FROM post_tags WHERE post_id=?", [postId]);
       await saveTags(postId, tags);
     }
@@ -137,10 +134,9 @@ export const deletePost = (req, res) => {
 };
 
 export const searchPosts = (req, res) => {
-  console.log("search post!");
-  const searchTerm = req.query.q; // Get the search term from query parameters
-  if (typeof searchTerm !== "string" || !searchTerm) {
-    return res.status(400).json({ message: "Search term is required" });
+  const searchTerm = typeof req.query.q === "string" ? req.query.q.trim() : "";
+  if (!searchTerm || searchTerm.length > 200) {
+    return res.status(400).json({ message: "Search term must be 1–200 characters" });
   }
 
   const q = `SELECT posts.id AS post_id, user_id, title, content, views, posts.created_at, posts.updated_at, privacy, users.username, 
