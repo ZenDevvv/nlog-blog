@@ -1,10 +1,10 @@
 // The post row lock serializes concurrent increments across requests/instances.
 // Store a keyed IP hash, never the raw address; shared-IP visitors count together.
-export async function countView(pool, postId, viewerHash) {
+export async function countView(pool, postId, viewerHash, userId = 0) {
   const connection = await pool.promise().getConnection();
   try {
     await connection.beginTransaction();
-    const [posts] = await connection.query("SELECT id FROM posts WHERE id = ? FOR UPDATE", [postId]);
+    const [posts] = await connection.query("SELECT id FROM posts WHERE id = ? AND (privacy = 'public' OR user_id = ?) FOR UPDATE", [postId, userId]);
     if (!posts.length) {
       await connection.rollback();
       return { found: false, counted: false };

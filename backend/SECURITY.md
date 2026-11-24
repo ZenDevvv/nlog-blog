@@ -47,3 +47,18 @@ check, run `RUN_TIDB_INTEGRATION=1 node --env-file=.env --test test/views.test.j
 from backend. It creates and removes a random scratch database and never inserts
 fixture records into the app database. The database user needs permission to
 create/drop that scratch database. Never run this test using an untrusted URL.
+
+## Guest access
+
+Guests may browse the public feed, trending posts, search, public posts and public
+profiles without creating a temporary account. All feed/search/trending queries
+filter to `privacy = 'public'`. Individual private posts and private profile posts
+are only returned to their authenticated owner. Missing and inaccessible posts
+both return 404. Invalid/expired cookies fall back to guest access on reads; all
+create/edit/delete operations still require a valid session and CSRF token.
+Private-post view increments require the owner too. API responses use no-store
+to avoid caching owner-specific responses for other visitors.
+
+The optional guest integration check is
+`RUN_TIDB_INTEGRATION=1 node --env-file=.env --test test/guests.test.js` from backend;
+it creates and removes its own scratch database like the view concurrency test.

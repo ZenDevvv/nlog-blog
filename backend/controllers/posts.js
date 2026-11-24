@@ -16,7 +16,7 @@ export const getAllPost = (req, res) => {
           JOIN users ON posts.user_id = users.id
           LEFT JOIN post_tags ON post_tags.post_id = posts.id
           LEFT JOIN tags ON post_tags.tag_id = tags.id
-          WHERE posts.id IN (
+          WHERE posts.privacy = 'public' AND posts.id IN (
               SELECT post_tags.post_id
               FROM post_tags
               JOIN tags ON post_tags.tag_id = tags.id
@@ -29,6 +29,7 @@ export const getAllPost = (req, res) => {
           JOIN users ON posts.user_id = users.id 
           LEFT JOIN post_tags ON post_tags.post_id = posts.id 
           LEFT JOIN tags ON post_tags.tag_id = tags.id 
+          WHERE posts.privacy = 'public'
           GROUP BY posts.id, posts.user_id, posts.title, posts.content, posts.views, posts.created_at, posts.updated_at, posts.privacy, users.username`;
 
   db.query(q, tag ? [tag] : [], (err, data) => {
@@ -42,7 +43,8 @@ export const getPost = (req, res) => {
   const postID = req.params.id;
 
   const q = `SELECT 
-    posts.id, 
+    posts.id,
+    posts.user_id,
     posts.title, 
     posts.content, 
     posts.views, 
@@ -60,11 +62,12 @@ LEFT JOIN
 LEFT JOIN 
     tags ON post_tags.tag_id = tags.id
 WHERE 
-    posts.id = ?
+    posts.id = ? AND (posts.privacy = 'public' OR posts.user_id = ?)
 GROUP BY 
-    posts.id, posts.title, posts.content, posts.views, posts.created_at, posts.updated_at, posts.privacy, users.username;`;
-  db.query(q, [postID], (err, data) => {
+    posts.id, posts.user_id, posts.title, posts.content, posts.views, posts.created_at, posts.updated_at, posts.privacy, users.username;`;
+  db.query(q, [postID, req.user?.id ?? 0], (err, data) => {
     if (err) return serverError(res, err);
+    if (!data.length) return res.status(404).json({ message: "Post not found" });
     return res.status(200).json(data);
   });
 };
@@ -146,7 +149,7 @@ export const searchPosts = (req, res) => {
               JOIN users ON posts.user_id = users.id
               LEFT JOIN post_tags ON post_tags.post_id = posts.id
               LEFT JOIN tags ON post_tags.tag_id = tags.id
-              WHERE users.username LIKE ? OR posts.title LIKE ? OR posts.content LIKE ? OR tags.tag_name LIKE ?
+              WHERE posts.privacy = 'public' AND (users.username LIKE ? OR posts.title LIKE ? OR posts.content LIKE ? OR tags.tag_name LIKE ?)
               GROUP BY posts.id, posts.user_id, posts.title, posts.content, posts.views, posts.created_at, posts.updated_at, posts.privacy, users.username;`;
 
   db.query(
@@ -166,7 +169,7 @@ export const searchPosts = (req, res) => {
 
 export const incrementViews = async (req, res) => {
   try {
-    const result = await countView(db, req.params.id, req.app.locals.security.viewerHash(req));
+    const result = await countView(db, req.params.id, req.app.locals.security.viewerHash(req), req.user?.id ?? 0);
     if (!result.found) return res.status(404).json({ message: "Post not found" });
     return res.status(200).json({ message: result.counted ? "View counted" : "View already counted", counted: result.counted });
   } catch (err) {
@@ -181,6 +184,7 @@ export const trendingPosts = (req, res) => {
               JOIN users ON posts.user_id = users.id 
               LEFT JOIN post_tags ON posts.id = post_tags.post_id 
               LEFT JOIN tags ON post_tags.tag_id = tags.id 
+              WHERE posts.privacy = 'public'
               GROUP BY posts.id, posts.user_id, posts.title, posts.content, posts.views, posts.created_at, posts.updated_at, posts.privacy, users.username
               ORDER BY views DESC;`
 

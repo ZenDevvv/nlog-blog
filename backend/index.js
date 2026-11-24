@@ -9,6 +9,8 @@ import postsRoutes from "./routes/posts.js";
 import cookieParser from "cookie-parser";
 import { serverError } from "./errors.js";
 
+import { optionalAuth } from "./middleware/auth.js";
+import { getProfile } from "./controllers/profile.js";
 import { createSecurity } from "./security.js";
 
 import { validateId } from "./validation.js";
@@ -26,6 +28,7 @@ const security = createSecurity({
 });
 app.locals.security = security;
 app.use(security.headers);
+app.use((req, res, next) => { res.set("Cache-Control", "no-store"); next(); });
 app.use(
   cors({
     origin: security.origin,
@@ -47,28 +50,7 @@ app.get("/", (req, res) => {
   res.json({ status: "Connected" });
 });
 
-app.get("/profile/:id", validateId, (req, res) => {
-  const userID = req.params.id;
-
-  const q = `SELECT users.id, users.username, users.created_at, 
-                posts.id AS post_id, posts.user_id, posts.title, posts.content, 
-                posts.views, posts.created_at AS post_created_at, posts.updated_at, 
-                posts.privacy, 
-                GROUP_CONCAT(tags.tag_name) AS tags 
-              FROM users 
-              LEFT JOIN posts ON users.id = posts.user_id 
-              LEFT JOIN post_tags ON posts.id = post_tags.post_id 
-              LEFT JOIN tags ON post_tags.tag_id = tags.id 
-              WHERE users.id = ?
-              GROUP BY users.id, users.username, users.created_at, posts.id, posts.user_id, posts.title, posts.content, posts.views, posts.created_at, posts.updated_at, posts.privacy;`;
-
-  db.query(q, [userID], (err, data) => {
-    if (err) return serverError(res, err);
-
-    // Directly return the data
-    return res.json(data);
-  });
-});
+app.get("/profile/:id", validateId, optionalAuth, getProfile);
 
 app.use((err, req, res, next) => {
   if (err.type === "entity.too.large") return res.status(413).json({ message: "Request body is too large (maximum 100 KB)" });

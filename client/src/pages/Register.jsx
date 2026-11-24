@@ -1,10 +1,11 @@
+import { safeReturnPath } from "../authNavigation";
 import { accountError } from "../validation";
 import MarbleInk from "../components/MarbleInk";
 import React, { useState } from "react";
 const SERVER = import.meta.env.VITE_DEV_SERVER;
 import axios from "axios";
 import Notif from "../components/Notif";
-import { useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 export default function Register() {
   const [inputs, setInputs] = useState({
@@ -14,6 +15,8 @@ export default function Register() {
   });
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const location = useLocation();
+  const returnTo = safeReturnPath(location.state?.from);
   const navigate = useNavigate()
 
   const handleChangeInput = (e) => {
@@ -33,7 +36,7 @@ export default function Register() {
       const res = await axios.post(`${SERVER}/auth/register`, inputs);
       console.log(res.data);
       setSuccess(res.data.message);
-      navigate("/login")
+      navigate("/login", { state: { from: returnTo } })
     } catch (err) {
       setSuccess(null)
       console.log(err);
@@ -101,11 +104,13 @@ export default function Register() {
           <p>
             Already have an account<span className="text-primary">?</span>
           </p>
-          <a href="/login" className="text-primary">
+          <Link to="/login" state={{ from: returnTo }} className="text-primary">
             log-in
-          </a>
+          </Link>
         </div>
+        <Link to="/" className="mt-6 inline-block text-primary underline">Continue as guest</Link>
       </div>
+
 
       <Notif error={error} success={success} />
     </div>

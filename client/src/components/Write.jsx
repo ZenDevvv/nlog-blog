@@ -1,6 +1,8 @@
+import { AuthContext } from "../context/AuthContext";
+import AuthPrompt from "./AuthPrompt";
 import { postError } from "../validation";
 import axios from "axios";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import RichTextEditor from "./RichTextEditor";
 const SERVER = import.meta.env.VITE_DEV_SERVER;
 import AddTagBtn from "./AddTagBtn";
@@ -10,6 +12,7 @@ import { motion as m, AnimatePresence } from "framer-motion";
 
 export default function Write({ setCreatePost, createPost, post }) {
   const navigate = useNavigate();
+  const { currentUser } = useContext(AuthContext);
   const { notifyError, notifySuccess } = useNotif();
 
   const [title, setTitle] = useState("");
@@ -68,6 +71,8 @@ export default function Write({ setCreatePost, createPost, post }) {
       notifyError(err.response?.data?.message || "Could not save the post");
     }
   };
+
+  if (createPost && !currentUser) return <AuthPrompt onClose={() => setCreatePost(false)} />;
 
   return (
     <AnimatePresence>

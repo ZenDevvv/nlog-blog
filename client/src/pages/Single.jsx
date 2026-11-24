@@ -14,41 +14,35 @@ const formatDate = (date) => {
 };
 
 export default function Single() {
-  // const dummy = {
-  //   id: 1,
-  //   username: "johndoe",
-  //   title: "Exploring the Mountains in the Ocean",
-  //   content:
-  //     "Last weekend, I hiked up the beautiful Blue Ridge Mountains. The views were breathtaking, and I can't wait to go back!Last weekend, I hiked up the beautiful Blue Ridge Mountains. The views were breathtaking, and I can't wait to go back!Last weekend, I hiked up the beautiful Blue Ridge Mountains. The views were breathtaking, and I can't wait to go back!Last weekend, I hiked up the beautiful Blue Ridge Mountains. The views were breathtaking, and I can't wait to go back!",
-  //   date: "15 March 2023",
-  //   tags: ["#hiking", "#nature", "#adventure"],
-  // };
-  const [post, setPost] = useState({});
+  const [post, setPost] = useState(null);
   const { currentUser } = useContext(AuthContext);
   const postsID = useLocation().pathname.split("/").pop();
   const navigate = useNavigate();
   const [createPost, setCreatePost] = useState(false);
-  const hasIncrementedViews = useRef(false);
+  const viewedPosts = useRef(new Set());
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const { notifySuccess, notifyError } = useNotif();
 
   useEffect(() => {
+    let active = true;
+    setLoading(true); setError(null); setPost(null); setCreatePost(false);
     const fetchPost = async () => {
       try {
         const res = await axios.get(`${SERVER}/posts/${postsID}`);
-        if (!res.data.length) { notifyError("Post not found"); navigate("/"); return; }
+        if (!active) return;
+        if (!res.data.length) { setError("Post not found"); return; }
         setPost(res.data[0]);
-
-        // Increment views only once
-        if (!hasIncrementedViews.current) {
-          await axios.put(`${SERVER}/posts/${postsID}/increment-views`);
-          hasIncrementedViews.current = true; // Set to true after incrementing
+        if (!viewedPosts.current.has(postsID)) {
+          viewedPosts.current.add(postsID);
+          axios.put(`${SERVER}/posts/${postsID}/increment-views`).catch(() => viewedPosts.current.delete(postsID));
         }
       } catch (err) {
-        console.log(err);
-      }
+        if (active) setError(err.response?.data?.message || "Could not load this post.");
+      } finally { if (active) setLoading(false); }
     };
-
     fetchPost();
+    return () => { active = false; };
   }, [postsID]);
 
   const getText = (html) => {
@@ -69,6 +63,9 @@ export default function Single() {
     }
   };
 
+  if (loading) return <p role="status" className="p-10 text-white lg:pl-40">Loading post…</p>;
+  if (error || !post) return <p role="alert" className="p-10 text-white lg:pl-40">{error || "Post not found"}</p>;
+
   return (
     <div className="text-white pb-24 p-10 md:px-24 lg:pl-40 max-w-[1000px] lg:pt-20 mx-auto">
       <div>
@@ -87,7 +84,7 @@ export default function Single() {
           </p>
           <p>on {formatDate(post.updated_at)}</p>
         </div>
-        {currentUser?.username === post.username && (
+        {currentUser?.id === post.user_id && (
           <div className="flex gap-4">
             <button onClick={() => setCreatePost(!createPost)}>Edit</button>
             <button onClick={handleDelete}>Delete</button>

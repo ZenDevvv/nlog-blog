@@ -9,7 +9,7 @@ import {
   incrementViews,
   trendingPosts,
 } from "../controllers/posts.js";
-import { requireAuth } from "../middleware/auth.js";
+import { requireAuth, optionalAuth } from "../middleware/auth.js";
 
 import { validateId } from "../validation.js";
 
@@ -19,13 +19,13 @@ router.param("id", (req, res, next) => validateId(req, res, next));
 
 router.get("/trending", trendingPosts)
 router.get("/search", searchPosts);
-router.get("/", requireAuth, getAllPost);
-router.get("/:id", getPost);
+router.get("/", getAllPost);
+router.get("/:id", optionalAuth, getPost);
 
 router.post("/", requireAuth, writeLimit, addPost);
 
 router.put("/:id", requireAuth, writeLimit, editPost);
-router.put("/:id/increment-views", (req, res, next) => req.app.locals.security.viewLimit(req, res, next), incrementViews);
+router.put("/:id/increment-views", optionalAuth, (req, res, next) => req.app.locals.security.viewLimit(req, res, next), incrementViews);
 
 router.delete("/:id", requireAuth, writeLimit, deletePost);
 

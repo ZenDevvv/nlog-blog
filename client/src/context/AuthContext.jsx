@@ -5,8 +5,10 @@ export const AuthContext = createContext();
 export const AuthContextProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(() => {
     // Parse the user from localStorage only if it exists
-    const storedUser = localStorage.getItem("user");
-    return storedUser ? JSON.parse(storedUser) : null;
+    try {
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+      return storedUser?.id && typeof storedUser.username === "string" ? storedUser : null;
+    } catch { return null; }
   });
 
   useEffect(() => {

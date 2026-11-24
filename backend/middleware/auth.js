@@ -11,3 +11,15 @@ export const requireAuth = (req, res, next) => {
     next();
   });
 };
+
+// Read routes treat missing/expired sessions as guests and never trust client state.
+export const optionalAuth = (req, res, next) => {
+  const token = req.cookies?.access_token;
+  if (token) {
+    try {
+      const user = jwt.verify(token, process.env.JWT_KEY, { algorithms: ["HS256"] });
+      if (Number.isInteger(user?.id) && user.id > 0 && user.id <= 2147483647) req.user = user;
+    } catch { /* Public browsing remains available when a session expires. */ }
+  }
+  next();
+};

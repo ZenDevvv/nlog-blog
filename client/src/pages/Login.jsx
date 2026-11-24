@@ -1,3 +1,4 @@
+import { safeReturnPath } from "../authNavigation";
 import { accountError } from "../validation";
 import React, { useContext, useEffect, useState } from "react";
 import MarbleInk from "../components/MarbleInk";
@@ -5,7 +6,7 @@ import axios from "axios";
 const SERVER = import.meta.env.VITE_DEV_SERVER;
 import Notif from "../components/Notif";
 import { AuthContext } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useNotif } from "../context/NotifContext";
 
 export default function Login() {
@@ -15,6 +16,8 @@ export default function Login() {
   });
   const { notifyError, notifySuccess, error, success } = useNotif();
   const { currentUser, setCurrentUser } = useContext(AuthContext);
+  const location = useLocation();
+  const returnTo = safeReturnPath(location.state?.from);
   const navigate = useNavigate();
 
   const [databaseLoading, setDatabaseLoading] = useState(true);
@@ -23,9 +26,7 @@ export default function Login() {
   useEffect(() => {
     const databaseConnect = async () => {
       try {
-        console.log(SERVER);
-        const res = await axios.get(`${SERVER}/`);
-        console.log(res.data);
+        await axios.get(`${SERVER}/`);
         setDatabaseLoading(false);
         setDatabaseError(null);
       } catch (err) {
@@ -55,7 +56,7 @@ export default function Login() {
       const { message, ...user } = res.data;
       setCurrentUser(user);
       notifySuccess(message);
-      navigate("/");
+      navigate(returnTo, { replace: true });
     } catch (err) {
       console.error("Login error:", err);
       notifyError(
@@ -112,13 +113,15 @@ export default function Login() {
               <p>
                 Don't have an account<span className="text-primary">?</span>
               </p>
-              <a href="/register" className="text-primary">
+              <Link to="/register" state={{ from: returnTo }} className="text-primary">
                 Sign-up
-              </a>
+              </Link>
             </div>
           </>
         )}
+        <Link to="/" className="mt-6 inline-block text-primary underline">Continue as guest</Link>
       </div>
+
       <Notif error={error} success={success} />
     </div>
   );

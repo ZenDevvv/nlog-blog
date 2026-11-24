@@ -7,7 +7,7 @@ import Single from "./pages/Single"
 import Register from "./pages/Register"
 import Profile from "./pages/Profile"
 import Notif from "./components/Notif"
-import Write from "./components/Write";
+import WritePage from "./pages/WritePage";
 import { useNotif } from "./context/NotifContext";
 
 const Layout = () => {
@@ -49,7 +49,7 @@ const router = createBrowserRouter([
       },
       {
         path:"/write",
-        element: <Write/>
+        element: <WritePage/>
       }
     ]
   },
