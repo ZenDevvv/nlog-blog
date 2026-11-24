@@ -161,31 +161,13 @@ export default function Write({ setCreatePost, createPost, post }) {
             animate={{ scale: 1 }}
             exit={{ scale: 0, transition: { duration: 0.1 } }}
             transition={{ type: "spring", duration: 0.7 }}
-            className="bg-darkBg w-full max-h-[90vh] overflow-y-auto p-6 border-2 border-primary rounded-md lg:max-w-[600px]"
+            className="bg-darkBg text-white w-full max-h-[90vh] overflow-y-auto p-6 border-2 border-primary rounded-md lg:max-w-[600px]"
           >
             <div className="space-y-5">
-              <h1 className="text-center text-2xl font-bold">
+              <h1 className="text-center text-2xl font-bold text-white">
                 {post ? "Edit Post" : "Create Post"}
               </h1>
               <div className="space-y-3">
-                <input
-                  className="px-4 py-2 bg-darkBg border-l border-primary w-full focus:outline-none"
-                  type="text"
-                  placeholder="Write your title"
-                  maxLength={200}
-                  onChange={(e) => setTitle(e.target.value)}
-                  value={title}
-                />
-
-                <div className="border-l border-primary h-[220px]">
-                  <RichTextEditor
-                    className="h-full font-serif custom-quill"
-                    value={content}
-                    onChange={setContent}
-                    placeholder="What's on your mind?"
-                  />
-                </div>
-
                 <div>
                   <input
                     ref={fileInputRef}
@@ -247,6 +229,24 @@ export default function Write({ setCreatePost, createPost, post }) {
                       </span>
                     </button>
                   )}
+                </div>
+
+                <input
+                  className="px-4 py-2 bg-darkBg text-white placeholder:text-gray-400 border-l border-primary w-full focus:outline-none"
+                  type="text"
+                  placeholder="Write your title"
+                  maxLength={200}
+                  onChange={(e) => setTitle(e.target.value)}
+                  value={title}
+                />
+
+                <div className="border-l border-primary h-[220px]">
+                  <RichTextEditor
+                    className="h-full font-serif custom-quill"
+                    value={content}
+                    onChange={setContent}
+                    placeholder="What's on your mind?"
+                  />
                 </div>
 
                 <div className="flex gap-2 flex-wrap">

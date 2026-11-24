@@ -10,7 +10,8 @@
 .ql-editor {
     font-family: 'Lexend Deca';
     font-size: 1rem /* 16px */;
-    line-height: 1.5rem
+    line-height: 1.5rem;
+    color: #ffffff;
 }
 
 .custom-quill .ql-editor::before {
