@@ -28,15 +28,19 @@ export default function Home() {
   }, [location.search, searching, trending]);
 
   return (
-    <section className="flex flex-col text-white pb-[100px] md:pb-[110px] lg:pl-32 lg:pr-16 xl:pl-[200px] xl:pr-28 max-w-[1600px] mx-auto">
-      <div className="flex flex-col py-14 items-center md:items-start md:px-24 overflow-x-hidden">
-        <div className="flex flex-col items-center md:ml-9">
-          <div className="bg-primary w-6 h-1 lg:w-10 lg:h-1.5" />
-          <h2 className="text-lg lg:text-2xl">{searching ? `Searched for: ${query || ""}` : trending ? "Trending" : "Latest"}</h2>
+    <section className="text-white pb-[100px] md:pb-[110px] lg:pl-24">
+      <div className="max-w-4xl mx-auto px-5 sm:px-8 md:px-10">
+        <div className="flex flex-col pt-10 pb-8 md:pt-12 md:pb-10 items-center md:items-start md:pl-[140px]">
+          <div className="flex flex-col items-center md:items-start">
+            <div className="bg-primary w-6 h-0.5 lg:w-8 lg:h-1 mb-2" />
+            <h2 className="text-base lg:text-lg font-medium tracking-wide text-white/90">
+              {searching ? `Searched for: ${query || ""}` : trending ? "Trending" : "Latest"}
+            </h2>
+          </div>
         </div>
-      </div>
-      <div className="flex flex-col gap-6 px-6 md:gap-10 lg:gap-14">
-        {loading ? <p role="status">Loading posts…</p> : error ? <p role="alert">{error}</p> : posts.length ? <Posts posts={posts} /> : <p>No public posts found.</p>}
+        <div className="flex flex-col">
+          {loading ? <p role="status" className="text-sm text-white/70 md:pl-[140px]">Loading posts…</p> : error ? <p role="alert" className="text-sm text-red-400 md:pl-[140px]">{error}</p> : posts.length ? <Posts posts={posts} /> : <p className="text-sm text-white/70 md:pl-[140px]">No public posts found.</p>}
+        </div>
       </div>
     </section>
   );

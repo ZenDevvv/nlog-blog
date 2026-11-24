@@ -7,77 +7,81 @@ import { delay, motion as m } from "framer-motion";
 
 export default function Posts({ posts }) {
   const getText = (html) => {
-    const doc = new DOMParser().parseFromString(html, "text/html");
-    return doc.body.textContent;
+    if (!html) return "";
+    const spaced = html.replace(/<(br|\/p|\/div|\/li|\/h[1-6]|\/blockquote)[^>]*>/gi, " ");
+    const doc = new DOMParser().parseFromString(spaced, "text/html");
+    return (doc.body.textContent || "").replace(/\s+/g, " ").trim();
   };
 
   return (
-    <div className="flex flex-col gap-6 md:gap-8 overflow-x-hidden">
+    <div className="flex flex-col gap-8 md:gap-10 overflow-x-hidden">
       {posts.map((post, idx) => {
         const formattedDate = dayjs(post.updated_at)
           .format("MMMM DD, YYYY")
           .toUpperCase();
 
         return (
-          <m.div
+          <m.article
             initial={{ x: "-50%", opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            transition={{ duration: 1, ease: "easeInOut", delay: 0.075 * idx }}
+            transition={{ duration: 0.6, ease: "easeOut", delay: 0.06 * idx }}
             key={post.post_id}
-            className="md:flex gap-4 min-h-[100px]"
+            className="md:flex gap-6 pb-8 md:pb-10 border-b border-white/10 last:border-b-0"
           >
-            <div className="pt-2 text-sm md:min-w-[175px] justify-between hidden md:flex flex-col md:justify-start md:pt-0 lg:gap-1.5">
-              <p className="text-end text-3xl">
+            <div className="hidden md:flex flex-col md:w-[116px] shrink-0 pt-1 text-right">
+              <p className="text-2xl font-medium leading-none text-white/90">
                 {formattedDate.split(" ")[1].replace(",", "")}
               </p>
-              <p className="text-end text-3xl">{formattedDate.split(" ")[0]}</p>
+              <p className="text-xs tracking-[0.14em] uppercase text-white/55 mt-1">
+                {formattedDate.split(" ")[0]}
+              </p>
 
-              <Link to={`/profile/${post.user_id}`}>
-                <p className="font-light text-end hover:underline pt-1">
+              <Link to={`/profile/${post.user_id}`} className="mt-2">
+                <p className="text-xs font-light text-white/60 hover:text-primary hover:underline">
                   @{post.username}
                 </p>
               </Link>
             </div>
 
-            <div className="w-full">
-              <h1 className="w-fit pb-1 text-primary font-serif text-xl md:text-3xl lg:text-4xl md:pb-2  hover:pl-2 transition-padding duration-200">
+            <div className="min-w-0 flex-1">
+              <h1 className="w-fit pb-1.5 text-primary font-serif text-xl md:text-2xl lg:text-[26px] leading-snug hover:translate-x-1 transition-transform duration-200">
                 <Link to={`/post/${post.post_id}`}>{post.title}</Link>
               </h1>
 
-              <p className="text-sm  md:text-lg lg:text-xl line-clamp-4">
+              <p className="text-sm md:text-[15px] lg:text-base leading-relaxed text-white/80 line-clamp-3">
                 {getText(post.content)}
               </p>
 
               {post.image_url && (
                 <Link
                   to={`/post/${post.post_id}`}
-                  className="block mt-3 overflow-hidden rounded-lg border border-white/10 bg-black/20"
+                  className="block mt-3.5 overflow-hidden rounded-lg border border-white/10 bg-black/20"
                 >
                   <img
                     src={post.image_url}
                     alt={post.title}
                     loading="lazy"
-                    className="w-full max-h-[420px] object-cover hover:scale-[1.01] transition-transform duration-300"
+                    className="w-full max-h-[300px] object-cover hover:scale-[1.01] transition-transform duration-300"
                   />
                 </Link>
               )}
 
-              <div className="pt-2 text-xs font-extralight flex justify-between md:hidden">
+              <div className="pt-2.5 text-xs font-light text-white/55 flex justify-between md:hidden">
                 <p>{formattedDate}</p>
 
                 <Link to={`/profile/${post.user_id}`}>
-                  <p href="" className="font-extralight hover:underline">
+                  <p className="hover:underline">
                     @{post.username}
                   </p>
                 </Link>
               </div>
 
               {post.tags && (
-                <ul className="flex gap-2 py-4 flex-wrap">
+                <ul className="flex gap-2 pt-3.5 flex-wrap">
                   {post.tags?.split(",").map((tag, id) => {
                     return (
                       <Link key={id} to={`/?tag=${tag}`}>
-                        <li className="text-xs lg:text-base text-primary border-[1px] font-light border-primary px-4 py-1 rounded-full hover:-translate-y-0.5 duration-200">
+                        <li className="text-xs text-primary/90 border border-primary/50 hover:border-primary font-light px-3 py-0.5 rounded-full hover:-translate-y-0.5 transition duration-200">
                           #{tag}
                         </li>
                       </Link>
@@ -86,7 +90,7 @@ export default function Posts({ posts }) {
                 </ul>
               )}
             </div>
-          </m.div>
+          </m.article>
         );
       })}
     </div>
