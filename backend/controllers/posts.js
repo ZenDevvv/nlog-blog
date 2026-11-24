@@ -20,14 +20,14 @@ export const getAllPost = (req, res) => {
               JOIN tags ON post_tags.tag_id = tags.id
               WHERE tags.tag_name = ?
           )
-          GROUP BY posts.id;`
+          GROUP BY posts.id, posts.user_id, posts.title, posts.content, posts.views, posts.created_at, posts.updated_at, posts.privacy, users.username;`
     : `SELECT posts.id AS post_id, user_id, title, content, views, posts.created_at, updated_at, privacy, username, 
             GROUP_CONCAT(tag_name) AS tags 
           FROM posts 
           JOIN users ON posts.user_id = users.id 
           LEFT JOIN post_tags ON post_tags.post_id = posts.id 
           LEFT JOIN tags ON post_tags.tag_id = tags.id 
-          GROUP BY posts.id`;
+          GROUP BY posts.id, posts.user_id, posts.title, posts.content, posts.views, posts.created_at, posts.updated_at, posts.privacy, users.username`;
 
   db.query(q, tag ? [tag] : [], (err, data) => {
     if (err) return serverError(res, err);
@@ -60,7 +60,7 @@ LEFT JOIN
 WHERE 
     posts.id = ?
 GROUP BY 
-    posts.id;`;
+    posts.id, posts.title, posts.content, posts.views, posts.created_at, posts.updated_at, posts.privacy, users.username;`;
   db.query(q, [postID], (err, data) => {
     if (err) return serverError(res, err);
     return res.status(200).json(data);
@@ -150,7 +150,7 @@ export const searchPosts = (req, res) => {
               LEFT JOIN post_tags ON post_tags.post_id = posts.id
               LEFT JOIN tags ON post_tags.tag_id = tags.id
               WHERE users.username LIKE ? OR posts.title LIKE ? OR posts.content LIKE ? OR tags.tag_name LIKE ?
-              GROUP BY posts.id;`;
+              GROUP BY posts.id, posts.user_id, posts.title, posts.content, posts.views, posts.created_at, posts.updated_at, posts.privacy, users.username;`;
 
   db.query(
     q,
@@ -185,7 +185,7 @@ export const trendingPosts = (req, res) => {
               JOIN users ON posts.user_id = users.id 
               LEFT JOIN post_tags ON posts.id = post_tags.post_id 
               LEFT JOIN tags ON post_tags.tag_id = tags.id 
-              GROUP BY posts.id 
+              GROUP BY posts.id, posts.user_id, posts.title, posts.content, posts.views, posts.created_at, posts.updated_at, posts.privacy, users.username
               ORDER BY views DESC;`
 
   db.query(q, (err, data) => {
