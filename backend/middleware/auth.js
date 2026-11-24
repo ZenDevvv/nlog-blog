@@ -6,7 +6,7 @@ export const requireAuth = (req, res, next) => {
   if (!token) return res.status(401).json({ message: "Not authenticated" });
 
   jwt.verify(token, process.env.JWT_KEY, { algorithms: ["HS256"] }, (err, user) => {
-    if (err) return res.status(403).json({ message: "Session is not valid" });
+    if (err || !Number.isInteger(user?.id) || user.id < 1 || user.id > 2147483647) return res.status(403).json({ message: "Session is not valid" });
     req.user = user;
     next();
   });

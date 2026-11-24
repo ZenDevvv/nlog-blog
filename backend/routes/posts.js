@@ -14,6 +14,7 @@ import { requireAuth } from "../middleware/auth.js";
 import { validateId } from "../validation.js";
 
 const router = express.Router();
+const writeLimit = (req, res, next) => req.app.locals.security.writeLimit(req, res, next);
 router.param("id", (req, res, next) => validateId(req, res, next));
 
 router.get("/trending", trendingPosts)
@@ -21,12 +22,12 @@ router.get("/search", searchPosts);
 router.get("/", requireAuth, getAllPost);
 router.get("/:id", getPost);
 
-router.post("/", requireAuth, addPost);
+router.post("/", requireAuth, writeLimit, addPost);
 
-router.put("/:id", requireAuth, editPost);
-router.put("/:id/increment-views", incrementViews);
+router.put("/:id", requireAuth, writeLimit, editPost);
+router.put("/:id/increment-views", (req, res, next) => req.app.locals.security.viewLimit(req, res, next), incrementViews);
 
-router.delete("/:id", requireAuth, deletePost);
+router.delete("/:id", requireAuth, writeLimit, deletePost);
 
 
 export default router;

@@ -9,21 +9,37 @@ import postsRoutes from "./routes/posts.js";
 import cookieParser from "cookie-parser";
 import { serverError } from "./errors.js";
 
+import { createSecurity } from "./security.js";
+
 import { validateId } from "./validation.js";
 
 const app = express();
 const port = process.env.PORT || 8080;
 
 
-app.use(express.json({ limit: "100kb" }));
-app.use(cookieParser());
+// Render terminates HTTPS at its reverse proxy. Local requests trust no proxy.
+app.set("trust proxy", process.env.RENDER === "true" ? 1 : false);
+const security = createSecurity({
+  secret: process.env.JWT_KEY,
+  origin: process.env.CLIENT_SERVER || (process.env.NODE_ENV !== "production" ? "http://localhost:5173" : undefined),
+  production: process.env.NODE_ENV === "production",
+});
+app.locals.security = security;
+app.use(security.headers);
 app.use(
   cors({
-    origin: process.env.CLIENT_SERVER,
+    origin: security.origin,
+    allowedHeaders: ["Content-Type", "X-CSRF-Token"],
+    exposedHeaders: ["RateLimit", "RateLimit-Policy", "Retry-After"],
     credentials: true,
   })
 );
 
+app.use(security.apiLimit);
+app.use(cookieParser());
+app.use(express.json({ limit: "100kb" }));
+app.use(security.csrfProtect);
+app.get("/auth/csrf", security.csrfToken);
 app.use("/auth", authRoutes);
 app.use("/posts", postsRoutes);
 

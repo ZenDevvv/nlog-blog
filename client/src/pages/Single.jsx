@@ -35,6 +35,7 @@ export default function Single() {
     const fetchPost = async () => {
       try {
         const res = await axios.get(`${SERVER}/posts/${postsID}`);
+        if (!res.data.length) { notifyError("Post not found"); navigate("/"); return; }
         setPost(res.data[0]);
 
         // Increment views only once
@@ -86,7 +87,7 @@ export default function Single() {
           </p>
           <p>on {formatDate(post.updated_at)}</p>
         </div>
-        {currentUser.username === post.username && (
+        {currentUser?.username === post.username && (
           <div className="flex gap-4">
             <button onClick={() => setCreatePost(!createPost)}>Edit</button>
             <button onClick={handleDelete}>Delete</button>

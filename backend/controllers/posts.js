@@ -1,4 +1,5 @@
 import db from "../dbconfig.js";
+import { countView } from "../views.js";
 import { validatePost, validTag } from "../validation.js";
 import { serverError } from "../errors.js";
 
@@ -163,15 +164,14 @@ export const searchPosts = (req, res) => {
   );
 };
 
-export const incrementViews = (req, res) => {
-  const postID = req.params.id; 
-  const q = `UPDATE posts SET views = views + 1, updated_at = updated_at WHERE id = ?;
-`; 
-
-  db.query(q, [postID], (err, data) => {
-    if (err) return serverError(res, err);
-    return res.status(200).json("Views incremented successfully");
-  });
+export const incrementViews = async (req, res) => {
+  try {
+    const result = await countView(db, req.params.id, req.app.locals.security.viewerHash(req));
+    if (!result.found) return res.status(404).json({ message: "Post not found" });
+    return res.status(200).json({ message: result.counted ? "View counted" : "View already counted", counted: result.counted });
+  } catch (err) {
+    return serverError(res, err);
+  }
 };
 
 export const trendingPosts = (req, res) => {

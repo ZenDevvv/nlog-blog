@@ -33,12 +33,13 @@ const connectionOptions = connectionUrl
       port: process.env.DB_PORT,
     };
 
-const db = mysql.createConnection(connectionOptions);
+const db = mysql.createPool({ ...connectionOptions, connectionLimit: 5, connectTimeout: 10000 });
 
-db.connect((err) => {
+db.getConnection((err, connection) => {
   if (err) {
     console.error("Database connection failed:", err.code || "CONNECTION_ERROR");
   } else {
+    connection.release();
     console.log("database connected successfully");
   }
 });
