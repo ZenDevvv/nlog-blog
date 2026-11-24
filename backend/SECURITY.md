@@ -62,3 +62,25 @@ to avoid caching owner-specific responses for other visitors.
 The optional guest integration check is
 `RUN_TIDB_INTEGRATION=1 node --env-file=.env --test test/guests.test.js` from backend;
 it creates and removes its own scratch database like the view concurrency test.
+
+## Cover image uploads (Cloudinary)
+
+Apply `migrations/003_post_images.sql` before deploying cover image uploads.
+Configure `CLOUDINARY_URL=cloudinary://<api_key>:<api_secret>@<cloud_name>`
+(the root folder defaults to `nlog-blog`, or can be overridden via
+`CLOUDINARY_ROOT_FOLDER`).
+
+- One optional cover image per post is accepted via `multipart/form-data` on
+  `POST /posts` and `PUT /posts/:id` (JSON requests remain supported for text-only posts).
+- CSRF, session authentication and per-account write rate limits run before `multer`
+  buffers any upload bytes.
+- Uploads are capped at 5 MB and validated by magic bytes (JPEG, PNG, WebP, GIF only;
+  SVGs and spoofed MIME types are rejected) before streaming to Cloudinary.
+- Assets are stored in organized folders:
+  `<rootFolder>/<env>/posts/user-<userId>/<YYYY>/<MM>/<uuid>` (where `<env>` is `prod`,
+  `staging` or `dev`), capped to `1200x1200` with `quality: "auto:good"` on upload
+  (non-GIF uploads are converted to WebP to minimize storage and bandwidth).
+- Replacing or removing a cover image or deleting a post cleans up the old Cloudinary
+  asset best-effort; failed DB writes roll back newly uploaded assets.
+- `netlify.toml` allows `blob:` (for local previews) and `https://res.cloudinary.com`
+  in `img-src`.

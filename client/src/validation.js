@@ -11,10 +11,24 @@ export function accountError({ username, email, password }, registering = false)
   return null;
 }
 
-export function postError(title, content, tags) {
+export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+export const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+
+export function imageError(file) {
+  if (!file) return null;
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+    return "Only JPEG, PNG, WebP, and GIF images are allowed";
+  }
+  if (file.size > MAX_IMAGE_BYTES) {
+    return "Image must be 5 MB or smaller";
+  }
+  return null;
+}
+
+export function postError(title, content, tags, imageFile = null) {
   if (!title.trim() || title.trim().length > 200) return "Title must be 1–200 characters";
   const plain = new DOMParser().parseFromString(content, "text/html").body.textContent;
   if (content.length > 50000 || !plain.replace(/[\s\u200B-\u200D\uFEFF]/g, "")) return "Post content must contain text and be at most 50,000 HTML characters";
   if (tags.length > 10 || !tags.every(tag => /^[A-Za-z0-9_-]{1,30}$/.test(tag))) return "Use at most 10 tags, each 1–30 letters, numbers, underscores or hyphens";
-  return null;
+  return imageError(imageFile);
 }

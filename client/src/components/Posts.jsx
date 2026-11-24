@@ -48,6 +48,20 @@ export default function Posts({ posts }) {
                 {getText(post.content)}
               </p>
 
+              {post.image_url && (
+                <Link
+                  to={`/post/${post.post_id}`}
+                  className="block mt-3 overflow-hidden rounded-lg border border-white/10 bg-black/20"
+                >
+                  <img
+                    src={post.image_url}
+                    alt={post.title}
+                    loading="lazy"
+                    className="w-full max-h-[420px] object-cover hover:scale-[1.01] transition-transform duration-300"
+                  />
+                </Link>
+              )}
+
               <div className="pt-2 text-xs font-extralight flex justify-between md:hidden">
                 <p>{formattedDate}</p>
 

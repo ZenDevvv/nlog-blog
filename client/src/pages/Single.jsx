@@ -104,7 +104,17 @@ export default function Single() {
         </ul>
       </div>
 
-      <div className="pt-12">
+      {post.image_url && (
+        <div className="mt-6 overflow-hidden rounded-lg border border-white/10 bg-black/20">
+          <img
+            src={post.image_url}
+            alt={post.title}
+            className="w-full max-h-[560px] object-contain mx-auto"
+          />
+        </div>
+      )}
+
+      <div className="pt-8">
         <p className="first-letter:text-6xl md:text-base leading-7">
           {getText(post.content)}
         </p>

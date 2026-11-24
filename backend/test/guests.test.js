@@ -19,7 +19,7 @@ test('guests browse public content, private posts stay owner-only, and all write
   u.pathname='/'+database;
   process.env.DATABASE_URL=u.toString();process.env.JWT_KEY='guest-test-secret-only';
   ({default:db}=await import('../dbconfig.js'));
-  for(const file of ['001_initial_schema.sql','002_post_views.sql']) for(const sql of readFileSync(new URL('../migrations/'+file,import.meta.url),'utf8').split(';').map(x=>x.trim()).filter(Boolean)) await db.promise().query(sql);
+  for(const file of ['001_initial_schema.sql','002_post_views.sql','003_post_images.sql']) for(const sql of readFileSync(new URL('../migrations/'+file,import.meta.url),'utf8').split(';').map(x=>x.trim()).filter(Boolean)) await db.promise().query(sql);
   const [owner]=await db.promise().query("INSERT INTO users(username,email,password) VALUES('fixture','fixture@example.invalid','fixture')");
   const [other]=await db.promise().query("INSERT INTO users(username,email,password) VALUES('other','other@example.invalid','fixture')");
   const [pub]=await db.promise().query("INSERT INTO posts(user_id,title,content,privacy) VALUES(?,'Public title','public body','public')",[owner.insertId]);
